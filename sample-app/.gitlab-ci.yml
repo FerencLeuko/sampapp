@@ -1,0 +1,15 @@
+image: maven:latest
+
+default:
+  tags:
+    - dev
+
+build:
+  stage: build
+  script:
+    - mvn compile
+
+test:
+  stage: test
+  script:
+    - mvn test
