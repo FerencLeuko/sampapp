@@ -174,7 +174,6 @@ public class BookingControllerTest {
         void testUpdateBooking_WithInvalidDates_For400() throws Exception {
                 try(MockedStatic<SecurityUtils> utilities = Mockito.mockStatic(SecurityUtils.class)) {
                         utilities.when(SecurityUtils::getUserEmailFromToken).thenReturn(TEST_USER_ID);
-                        Mockito.when(bookingBusinessService.getBooking(TEST_BOOKING_ID)).thenReturn(getMockBooking(TEST_BOOKING_ID));
                         UpdateRequest updateRequest = getValidUpdateRequest();
                         updateRequest.getDateRange().setStartDate(LocalDate.now().minusDays(1));
                         mockMvc.perform(put("/bookings/{bookingId}", "0")
