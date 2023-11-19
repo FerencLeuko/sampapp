@@ -93,9 +93,6 @@ public class CarControllerTest {
     void testPostCar_For400() throws Exception {
         CarDto actual = getCarDto();
         actual.setLicencePlate("");
-        Mockito.when(carBusinessService
-				.createCar(carMapper.fromDto(actual)))
-                .thenReturn(getCar());
         mockMvc.perform(post("/cars")
                         .contentType("application/json").content(objectMapper.writeValueAsString(actual)))
                 .andExpect(status().isBadRequest());
