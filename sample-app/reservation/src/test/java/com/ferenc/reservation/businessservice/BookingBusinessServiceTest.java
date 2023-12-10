@@ -18,6 +18,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -28,12 +29,13 @@ import java.time.LocalDate;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.verify;
 
 @SpringBootTest
 @ContextConfiguration
 @Profile("test")
 @Tag("IntegrationTest")
-public class BookingBusinessServiceTest {
+class BookingBusinessServiceTest {
 	
     private static final int TEST_BOOKING_ID = 1;
     private static final String TEST_USER_ID = "abc@google.com";
@@ -83,10 +85,14 @@ public class BookingBusinessServiceTest {
                         bookingRequest.getDateRange().getStartDate(),
                         bookingRequest.getDateRange().getEndDate()
                 );
-        assertEquals(booking.getUserId(), TEST_USER_ID);
+        assertEquals(TEST_USER_ID, booking.getUserId());
         assertEquals(booking.getCar().getLicencePlate(), bookingRequest.getLicencePlate());
         assertEquals(booking.getStartDate(), bookingRequest.getDateRange().getStartDate());
         assertEquals(booking.getEndDate(), bookingRequest.getDateRange().getEndDate());
+
+        ArgumentCaptor<Booking> captor = ArgumentCaptor.forClass(Booking.class);
+        verify(this.bookingEventPublishingService).publishNewBookingEvent(captor.capture());
+        assertEquals(booking, captor.getValue());
     }
 
     @Test
@@ -113,7 +119,7 @@ public class BookingBusinessServiceTest {
     void testGetBooking(){
         BookingBusinessService bookingBusinessService = getBookingBusinessService();
         Booking booking = bookingBusinessService.getBooking(TEST_BOOKING_ID);
-        assertEquals(booking.getBookingId(), TEST_BOOKING_ID);
+        assertEquals(TEST_BOOKING_ID, booking.getBookingId());
         
     }
     @Test
@@ -135,7 +141,7 @@ public class BookingBusinessServiceTest {
                         bookingRequest.getDateRange().getEndDate()
                 );
         List<Booking> bookings = bookingBusinessService.getAllBookings();
-        assertEquals(bookings.size(),2);
+        assertEquals(2, bookings.size());
         assertTrue(bookings.contains(booking));
     }
 
