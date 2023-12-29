@@ -1,17 +1,13 @@
 package com.ferenc.commons.event;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Value;
 
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
+@Value
 @Builder
 public class BookingEvent implements Serializable {
 
@@ -26,5 +22,4 @@ public class BookingEvent implements Serializable {
     private LocalDate startDate;
 
     private LocalDate endDate;
-
 }

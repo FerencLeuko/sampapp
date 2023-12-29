@@ -99,7 +99,7 @@ class BookingBusinessServiceTest {
     void testCreateBooking_ForCarNotAvailableException(){
         BookingBusinessService bookingBusinessService = getBookingBusinessService();
         BookingRequest bookingRequest = getValidBookingRequest();
-        Booking booking = bookingBusinessService
+        bookingBusinessService
                 .createBooking(
                         TEST_USER_ID,
                         bookingRequest.getLicencePlate(),
@@ -176,7 +176,6 @@ class BookingBusinessServiceTest {
                         bookingRequest.getDateRange().getStartDate().plusDays(1),
                         bookingRequest.getDateRange().getEndDate().plusDays(1)
                 );
-        UpdateRequest updateRequest = getValidUpdateRequest();
         assertThrows(CarNotAvailableException.class,
                 () -> bookingBusinessService
                         .updateBooking(
