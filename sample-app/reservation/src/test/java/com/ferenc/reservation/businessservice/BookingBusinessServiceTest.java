@@ -49,6 +49,8 @@ class BookingBusinessServiceTest {
     private BookingSequenceHelper bookingSequenceHelper;
     @Autowired
     private BookingSequenceRepository bookingSequenceRepository;
+    @Autowired
+    private LockService lockService;
     
     @Mock
     private BookingEventPublishingService bookingEventPublishingService;
@@ -193,7 +195,7 @@ class BookingBusinessServiceTest {
 
     private BookingBusinessService getBookingBusinessService() {
         BookingBusinessService bookingBusinessService =
-                new BookingBusinessServiceImpl(carRepository,bookingRepository,bookingSequenceHelper,bookingEventPublishingService);
+                new BookingBusinessServiceImpl(carRepository,bookingRepository,bookingSequenceHelper,bookingEventPublishingService, lockService);
         return bookingBusinessService;
     }
 
