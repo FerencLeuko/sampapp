@@ -74,6 +74,7 @@ public class BookingBusinessServiceImpl implements BookingBusinessService {
     }
 
     @Override
+    @Transactional
     public Booking updateBooking(Integer bookingId, LocalDate startDate, LocalDate endDate) {
         Booking booking = getBooking(bookingId);
         String licencePlate = booking.getCar().getLicencePlate();

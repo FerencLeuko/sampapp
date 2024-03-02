@@ -33,7 +33,7 @@ public class LockServiceImpl implements LockService {
         }
         PessimisticLock pessimisticLock = new PessimisticLock();
         pessimisticLock.setLisencePlate(licencePlate);
-        pessimisticLockRepository.save(pessimisticLock);
+        pessimisticLockRepository.insert(pessimisticLock);
         logger.info("Lock created: {}, at {}", licencePlate, pessimisticLock.getCreatedDate());
 
     }
