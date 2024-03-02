@@ -26,7 +26,7 @@ public class LockServiceImpl implements LockService {
         if(existingLock.isPresent()){
             Date createdDate = existingLock.get().getCreatedDate();
             Date now = new Date();
-            if(createdDate.getTime() - now.getTime() > 30000 ){
+            if(now.getTime() - createdDate.getTime() > 30000 ){
                 pessimisticLockRepository.delete(existingLock.get());
                 logger.info("Lock deleted: {}, {}, at {}", licencePlate, createdDate, now);
             }
