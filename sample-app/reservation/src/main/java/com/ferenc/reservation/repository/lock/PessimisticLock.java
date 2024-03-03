@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.domain.Persistable;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
@@ -13,11 +14,16 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class PessimisticLock {
+public class PessimisticLock implements Persistable<String> {
 
     @Id
-    private String lisencePlate;
+    private String id;
 
     @CreatedDate
     private Date createdDate;
+
+    @Override
+    public boolean isNew() {
+        return this.createdDate == null;
+    }
 }
