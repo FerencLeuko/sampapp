@@ -22,7 +22,7 @@ public class LockServiceImpl implements LockService {
 
     @Override
     @Retryable(value = {DuplicateKeyException.class}, maxAttempts = 4, backoff = @Backoff(delay = 1000))
-    public void acquireLock(String licencePlate, String userId) {
+    public boolean acquireLock(String licencePlate, String userId) {
         Optional<PessimisticLock> existingLock = pessimisticLockRepository.findById(licencePlate);
         if(existingLock.isPresent()){
             Date createdDate = existingLock.get().getCreatedDate();
@@ -37,6 +37,7 @@ public class LockServiceImpl implements LockService {
         pessimisticLock.setUserId(userId);
         pessimisticLockRepository.insert(pessimisticLock);
         logger.info("Lock created: {}, at {}", licencePlate, pessimisticLock.getCreatedDate());
+        return true;
     }
 
     @Override

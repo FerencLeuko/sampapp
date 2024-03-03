@@ -42,15 +42,16 @@ public class BookingBusinessServiceImpl implements BookingBusinessService {
         booking.setStartDate(startDate);
         booking.setEndDate(endDate);
 
-        try {
-            lockService.acquireLock(licencePlate, userId);
-            if (!isCarAvailable(licencePlate, startDate, endDate)) {
-                throw new CarNotAvailableException("This car: " + licencePlate + " is not available for this time range: " + startDate + " - " + endDate + ".");
+        if(lockService.acquireLock(licencePlate, booking.getUserId())) {
+            try {
+                if (!isCarAvailable(licencePlate, startDate, endDate)) {
+                    throw new CarNotAvailableException("This car: " + licencePlate + " is not available for this time range: " + startDate + " - " + endDate + ".");
+                }
+                booking.setBookingId(bookingSequenceHelper.getNextSequence());
+                bookingRepository.save(booking);
+            } finally {
+                lockService.releaseLock(licencePlate, userId);
             }
-            booking.setBookingId(bookingSequenceHelper.getNextSequence());
-            bookingRepository.save(booking);
-        } finally {
-            lockService.releaseLock(licencePlate, userId);
         }
 
         logger.info("Booking has been created, bookingId: {}", booking.getBookingId());
@@ -81,16 +82,17 @@ public class BookingBusinessServiceImpl implements BookingBusinessService {
         Booking booking = getBooking(bookingId);
         String licencePlate = booking.getCar().getLicencePlate();
 
-        try {
-            lockService.acquireLock(licencePlate, booking.getUserId());
-            if (!isCarAvailable(licencePlate, startDate, endDate, Optional.of(booking))) {
-                throw new CarNotAvailableException("This car: " + licencePlate + " is not available for this time range: " + startDate + " - " + endDate + ".");
+        if(lockService.acquireLock(licencePlate, booking.getUserId())) {
+            try {
+                if (!isCarAvailable(licencePlate, startDate, endDate, Optional.of(booking))) {
+                    throw new CarNotAvailableException("This car: " + licencePlate + " is not available for this time range: " + startDate + " - " + endDate + ".");
+                }
+                booking.setStartDate(startDate);
+                booking.setEndDate(endDate);
+                bookingRepository.save(booking);
+            } finally {
+                lockService.releaseLock(licencePlate, booking.getUserId());
             }
-            booking.setStartDate(startDate);
-            booking.setEndDate(endDate);
-            bookingRepository.save(booking);
-        } finally {
-            lockService.releaseLock(licencePlate, booking.getUserId());
         }
         
         logger.info("Booking has been updated, bookingId: {}", booking.getBookingId());
