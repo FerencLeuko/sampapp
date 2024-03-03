@@ -1,4 +1,4 @@
-package com.ferenc.reservation.businessservice;
+package com.ferenc.reservation.repository.lock;
 
 public interface LockService {
 

@@ -1,6 +1,7 @@
-package com.ferenc.reservation.businessservice;
+package com.ferenc.reservation.repository.lock;
 
 import com.ferenc.reservation.repository.PessimisticLockRepository;
+import com.ferenc.reservation.repository.lock.LockService;
 import com.ferenc.reservation.repository.lock.PessimisticLock;
 
 import lombok.RequiredArgsConstructor;
