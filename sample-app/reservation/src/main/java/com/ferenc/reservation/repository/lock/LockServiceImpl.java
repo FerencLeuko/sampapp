@@ -1,9 +1,6 @@
 package com.ferenc.reservation.repository.lock;
 
 import com.ferenc.reservation.repository.PessimisticLockRepository;
-import com.ferenc.reservation.repository.lock.LockService;
-import com.ferenc.reservation.repository.lock.PessimisticLock;
-
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +22,7 @@ public class LockServiceImpl implements LockService {
 
     @Override
     @Retryable(value = {DuplicateKeyException.class}, maxAttempts = 4, backoff = @Backoff(delay = 1000))
-    public void acquireLock(String licencePlate) {
+    public void acquireLock(String licencePlate, String userId) {
         Optional<PessimisticLock> existingLock = pessimisticLockRepository.findById(licencePlate);
         if(existingLock.isPresent()){
             Date createdDate = existingLock.get().getCreatedDate();
@@ -37,18 +34,21 @@ public class LockServiceImpl implements LockService {
         }
         PessimisticLock pessimisticLock = new PessimisticLock();
         pessimisticLock.setId(licencePlate);
+        pessimisticLock.setUserId(userId);
         pessimisticLockRepository.insert(pessimisticLock);
         logger.info("Lock created: {}, at {}", licencePlate, pessimisticLock.getCreatedDate());
     }
 
     @Override
-    public void releaseLock(String licencePlate) {
+    public void releaseLock(String licencePlate, String userId) {
         Optional<PessimisticLock> existingLock = pessimisticLockRepository.findById(licencePlate);
         if(existingLock.isPresent()){
-            Date createdDate = existingLock.get().getCreatedDate();
-            Date now = new Date();
-            pessimisticLockRepository.delete(existingLock.get());
-            logger.info("Lock deleted: {}, {}, at {}", licencePlate, createdDate, now);
+            if(existingLock.get().getUserId().equals(userId)) {
+                Date createdDate = existingLock.get().getCreatedDate();
+                Date now = new Date();
+                pessimisticLockRepository.delete(existingLock.get());
+                logger.info("Lock deleted: {}, {}, at {}", licencePlate, createdDate, now);
+            }
         }
     }
 }

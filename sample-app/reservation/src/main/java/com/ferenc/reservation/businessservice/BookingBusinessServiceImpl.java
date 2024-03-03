@@ -6,19 +6,18 @@ import com.ferenc.reservation.exception.NoSuchBookingException;
 import com.ferenc.reservation.repository.BookingRepository;
 import com.ferenc.reservation.repository.BookingSequenceHelper;
 import com.ferenc.reservation.repository.CarRepository;
-import com.ferenc.reservation.repository.PessimisticLockRepository;
-import com.ferenc.reservation.repository.lock.PessimisticLock;
+import com.ferenc.reservation.repository.lock.LockService;
 import com.ferenc.reservation.repository.model.Booking;
 import com.ferenc.reservation.repository.model.Car;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -44,14 +43,14 @@ public class BookingBusinessServiceImpl implements BookingBusinessService {
         booking.setEndDate(endDate);
 
         try {
-            lockService.acquireLock(licencePlate);
+            lockService.acquireLock(licencePlate, userId);
             if (!isCarAvailable(licencePlate, startDate, endDate)) {
                 throw new CarNotAvailableException("This car: " + licencePlate + " is not available for this time range: " + startDate + " - " + endDate + ".");
             }
             booking.setBookingId(bookingSequenceHelper.getNextSequence());
             bookingRepository.save(booking);
         } finally {
-            lockService.releaseLock(licencePlate);
+            lockService.releaseLock(licencePlate, userId);
         }
 
         logger.info("Booking has been created, bookingId: {}", booking.getBookingId());
@@ -83,7 +82,7 @@ public class BookingBusinessServiceImpl implements BookingBusinessService {
         String licencePlate = booking.getCar().getLicencePlate();
 
         try {
-            lockService.acquireLock(licencePlate);
+            lockService.acquireLock(licencePlate, booking.getUserId());
             if (!isCarAvailable(licencePlate, startDate, endDate, Optional.of(booking))) {
                 throw new CarNotAvailableException("This car: " + licencePlate + " is not available for this time range: " + startDate + " - " + endDate + ".");
             }
@@ -91,7 +90,7 @@ public class BookingBusinessServiceImpl implements BookingBusinessService {
             booking.setEndDate(endDate);
             bookingRepository.save(booking);
         } finally {
-            lockService.releaseLock(licencePlate);
+            lockService.releaseLock(licencePlate, booking.getUserId());
         }
         
         logger.info("Booking has been updated, bookingId: {}", booking.getBookingId());

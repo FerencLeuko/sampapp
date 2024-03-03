@@ -2,7 +2,7 @@ package com.ferenc.reservation.repository.lock;
 
 public interface LockService {
 
-    void acquireLock(String licencePlate);
+    void acquireLock(String licencePlate, String userId);
 
-    void releaseLock(String licencePlate);
+    void releaseLock(String licencePlate, String userId);
 }
