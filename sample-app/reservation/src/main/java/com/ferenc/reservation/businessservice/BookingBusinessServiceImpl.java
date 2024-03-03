@@ -54,9 +54,9 @@ public class BookingBusinessServiceImpl implements BookingBusinessService {
             }
         }
 
-        logger.info("Booking has been created, bookingId: {}", booking.getBookingId());
         bookingEventPublishingService.publishNewBookingEvent(booking);
-        logger.info("BookingEvent has been published, bookingId: {}", booking.getBookingId());
+
+        logger.info("Booking has been created, bookingId: {}", booking.getBookingId());
         return booking;
     }
 
