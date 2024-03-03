@@ -4,7 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 
+import java.sql.Ref;
 import java.time.LocalDate;
 @Data
 @AllArgsConstructor
@@ -20,5 +22,6 @@ public class Booking {
 
     private LocalDate endDate;
 
+    @DBRef
     private Car car;
 }
