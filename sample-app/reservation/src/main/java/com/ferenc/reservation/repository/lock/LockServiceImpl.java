@@ -9,12 +9,16 @@ import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class LockServiceImpl implements LockService {
+
+    private static final int EXPIRY_TIME_MS = 5000;
 
     private final Logger logger = LoggerFactory.getLogger(LockService.class);
 
@@ -23,15 +27,6 @@ public class LockServiceImpl implements LockService {
     @Override
     @Retryable(value = {DuplicateKeyException.class}, maxAttempts = 4, backoff = @Backoff(delay = 1000))
     public boolean acquireLock(String licencePlate, String userId) {
-        Optional<PessimisticLock> existingLock = pessimisticLockRepository.findById(licencePlate);
-        if(existingLock.isPresent()){
-            Date createdDate = existingLock.get().getCreatedDate();
-            Date now = new Date();
-            if(now.getTime() - createdDate.getTime() > 3000 ){
-                pessimisticLockRepository.delete(existingLock.get());
-                logger.info("Lock deleted: {}, {}, at {}", licencePlate, createdDate, now);
-            }
-        }
         PessimisticLock pessimisticLock = new PessimisticLock();
         pessimisticLock.setId(licencePlate);
         pessimisticLock.setUserId(userId);
@@ -51,5 +46,14 @@ public class LockServiceImpl implements LockService {
                 logger.info("Lock deleted: {}, {}, at {}", licencePlate, createdDate, now);
             }
         }
+    }
+
+    @Override
+    public void deleteExpiredLocks() {
+        Instant now = Instant.now();
+        Instant expiration = now.minusMillis(EXPIRY_TIME_MS);
+
+        List<PessimisticLock> locks = pessimisticLockRepository.findByCreatedDateBefore(Date.from(expiration));
+        pessimisticLockRepository.deleteAll(locks);
     }
 }
