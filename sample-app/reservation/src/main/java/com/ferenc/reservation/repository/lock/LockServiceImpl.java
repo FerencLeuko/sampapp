@@ -28,29 +28,20 @@ public class LockServiceImpl implements LockService {
 
     private final PessimisticLockRepository pessimisticLockRepository;
 
-    private final MongoTransactionManager transactionManager;
-
     @Override
     @Transactional
     @Retryable(value = {DataAccessException.class}, maxAttempts = 4, backoff = @Backoff(delay = 300))
     public boolean acquireLock(String licencePlate, String userId) {
-        TransactionStatus transactionStatus = transactionManager.getTransaction(null);
         PessimisticLock existingLock = pessimisticLockRepository.findById(licencePlate).orElse(null);
-        try{
-            if (existingLock != null) {
-                throw new DuplicateKeyException(String.format("Car %s currently not available.", licencePlate ));
-            }
-            PessimisticLock pessimisticLock = new PessimisticLock();
-            pessimisticLock.setId(licencePlate);
-            pessimisticLock.setUserId(userId);
-            pessimisticLockRepository.insert(pessimisticLock);
-            logger.info("Lock created: {}, at {}", licencePlate, pessimisticLock.getCreatedDate());
-            transactionManager.commit(transactionStatus);
-            return true;
-        } catch (Throwable e) {
-            transactionManager.rollback(transactionStatus);
-            throw e;
+        if (existingLock != null) {
+            throw new DuplicateKeyException(String.format("Car %s currently not available.", licencePlate ));
         }
+        PessimisticLock pessimisticLock = new PessimisticLock();
+        pessimisticLock.setId(licencePlate);
+        pessimisticLock.setUserId(userId);
+        pessimisticLockRepository.insert(pessimisticLock);
+        logger.info("Lock created: {}, at {}", licencePlate, pessimisticLock.getCreatedDate());
+        return true;
     }
 
     @Override
