@@ -55,5 +55,6 @@ public class LockServiceImpl implements LockService {
 
         List<PessimisticLock> locks = pessimisticLockRepository.findByCreatedDateBefore(Date.from(expiration));
         pessimisticLockRepository.deleteAll(locks);
+        logger.info("Locks deleted: {}, at {}.", locks.size(), now);
     }
 }
