@@ -48,6 +48,7 @@ public class LockServiceImpl implements LockService {
             transactionManager.commit(transactionStatus);
             return true;
         } catch (Throwable e) {
+            logger.info("Lock cannot be created: {}, at {}, {}", licencePlate, Instant.now(), e);
             transactionManager.rollback(transactionStatus);
             throw e;
         }
