@@ -62,10 +62,10 @@ public class LockServiceImpl implements LockService {
         Instant now = Instant.now();
         Instant expiration = now.minusMillis(EXPIRY_TIME_MS);
 
-        List<PessimisticLock> locks = pessimisticLockRepository.findByCreatedDateBefore(Date.from(expiration));
-        if(locks.size()>0) {
-            pessimisticLockRepository.deleteAll(locks);
-            logger.info("Locks deleted: {}, at {}.", locks.size(), now);
+        List<PessimisticLock> expiredLocks = pessimisticLockRepository.findByCreatedDateBefore(Date.from(expiration));
+        if(expiredLocks.size()>0) {
+            pessimisticLockRepository.deleteAll(expiredLocks);
+            logger.info("Locks deleted: {}, at {}.", expiredLocks.size(), now);
         }
     }
 }
