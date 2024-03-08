@@ -10,6 +10,7 @@ import com.ferenc.reservation.repository.BookingRepository;
 import com.ferenc.reservation.repository.BookingSequenceHelper;
 import com.ferenc.reservation.repository.BookingSequenceRepository;
 import com.ferenc.reservation.repository.CarRepository;
+import com.ferenc.reservation.repository.lock.LockService;
 import com.ferenc.reservation.repository.model.Booking;
 import com.ferenc.reservation.repository.model.BookingSequence;
 import com.ferenc.reservation.repository.model.Car;

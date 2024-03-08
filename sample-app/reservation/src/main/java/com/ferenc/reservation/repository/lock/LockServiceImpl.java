@@ -30,7 +30,7 @@ public class LockServiceImpl implements LockService {
 
     @Override
     @Transactional
-    @Retryable(value = {DataAccessException.class}, maxAttempts = 4, backoff = @Backoff(delay = 300))
+    @Retryable(value = {DataAccessException.class}, maxAttempts = 4, backoff = @Backoff(delay = 400))
     public boolean acquireLock(String licencePlate, String userId) {
         PessimisticLock existingLock = pessimisticLockRepository.findById(licencePlate).orElse(null);
         if (existingLock != null) {
@@ -62,10 +62,10 @@ public class LockServiceImpl implements LockService {
         Instant now = Instant.now();
         Instant expiration = now.minusMillis(EXPIRY_TIME_MS);
 
-        List<PessimisticLock> locks = pessimisticLockRepository.findByCreatedDateBefore(Date.from(expiration));
-        if(locks.size()>0) {
-            pessimisticLockRepository.deleteAll(locks);
-            logger.info("Locks deleted: {}, at {}.", locks.size(), now);
+        List<PessimisticLock> expiredLocks = pessimisticLockRepository.findByCreatedDateBefore(Date.from(expiration));
+        if(expiredLocks.size()>0) {
+            pessimisticLockRepository.deleteAll(expiredLocks);
+            logger.info("Locks deleted: {}, at {}.", expiredLocks.size(), now);
         }
     }
 }
