@@ -1,4 +1,4 @@
-package com.ferenc.reservation;
+package com.ferenc.reservation.IT;
 
 import org.junit.jupiter.api.Tag;
 import org.springframework.context.annotation.Configuration;

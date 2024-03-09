@@ -1,8 +1,10 @@
-package com.ferenc.reservation.repository.lock;
+package com.ferenc.reservation.IT;
 
 import com.ferenc.reservation.amqp.service.BookingEventPublishingService;
 import com.ferenc.reservation.businessservice.BookingBusinessService;
 import com.ferenc.reservation.repository.*;
+import com.ferenc.reservation.repository.lock.LockService;
+import com.ferenc.reservation.repository.model.Booking;
 import com.ferenc.reservation.repository.model.BookingSequence;
 import com.ferenc.reservation.repository.model.Car;
 import com.ferenc.reservation.repository.model.CarTypeEnum;
@@ -18,6 +20,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -29,7 +32,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ContextConfiguration
 @Profile("test")
 @Tag("IntegrationTest")
-public class LockServiceTest {
+public class LockServiceIT {
 
     @Autowired
     private BookingBusinessService bookingService;
@@ -66,15 +69,14 @@ public class LockServiceTest {
         Car car3 = new Car("ABC125","Opel","Astra", CarTypeEnum.STATION_WAGON,5);
         carRepository.save(car3);
         bookingRepository.deleteAll();
-        lockService.deleteExpiredLocks();
     }
 
     @AfterEach
     void cleanUp(){
         bookingRepository.deleteAll();
-        lockService.deleteExpiredLocks();
-        carRepository.deleteAll();
         bookingSequenceRepository.deleteAll();
+        pessimisticLockRepository.deleteAll();
+        carRepository.deleteAll();
     }
 
     @Test
@@ -88,7 +90,11 @@ public class LockServiceTest {
             executorService.shutdown();
         }
         executorService.awaitTermination(10, TimeUnit.SECONDS);
-        assertThat(bookingRepository.findByCarLicencePlate(licencePlate).size()).isEqualTo(2);
+        List<Booking> bookings = bookingRepository.findByCarLicencePlate(licencePlate);
+
+        assertThat(bookings.size()).isEqualTo(2);
+        assertThat(bookings).anySatisfy(booking -> assertThat(booking.getUserId()).isEqualTo(userId1));
+        assertThat(bookings).anySatisfy(booking -> assertThat(booking.getUserId()).isEqualTo(userId2));
     }
 
     @Test

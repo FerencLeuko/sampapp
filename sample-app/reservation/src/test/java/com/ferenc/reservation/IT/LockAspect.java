@@ -1,4 +1,4 @@
-package com.ferenc.reservation.repository.lock;
+package com.ferenc.reservation.IT;
 
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
