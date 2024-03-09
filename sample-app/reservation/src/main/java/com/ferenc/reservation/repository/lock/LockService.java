@@ -6,5 +6,4 @@ public interface LockService {
 
     void releaseLock(String licencePlate, String userId);
 
-    void deleteExpiredLocks();
 }

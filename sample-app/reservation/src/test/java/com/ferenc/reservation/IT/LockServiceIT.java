@@ -46,8 +46,6 @@ public class LockServiceIT {
     private BookingSequenceRepository bookingSequenceRepository;
     @Autowired
     private LockService lockService;
-    @Autowired
-    private PessimisticLockRepository pessimisticLockRepository;
 
     @Mock
     private BookingEventPublishingService bookingEventPublishingService;
@@ -75,7 +73,6 @@ public class LockServiceIT {
     void cleanUp(){
         bookingRepository.deleteAll();
         bookingSequenceRepository.deleteAll();
-        pessimisticLockRepository.deleteAll();
         carRepository.deleteAll();
     }
 
@@ -112,31 +109,4 @@ public class LockServiceIT {
         assertThat(bookingRepository.findByCarLicencePlate(licencePlate).size()).isEqualTo(1);
     }
 
-    @Test
-    @DirtiesContext
-    public void testConcurrentLocking() throws InterruptedException, ExecutionException {
-        ExecutorService executorService = Executors.newFixedThreadPool(2);
-        try {
-            executorService.submit(() -> lockService.acquireLock(licencePlate, userId1));
-            executorService.submit(() -> lockService.acquireLock(licencePlate, userId2));
-        } finally {
-            executorService.shutdown();
-        }
-        executorService.awaitTermination(5, TimeUnit.SECONDS);
-        assertThat(pessimisticLockRepository.findAll().size()).isEqualTo(1);
-    }
-
-    @Test
-    @DirtiesContext
-    public void testConcurrentLockingDifferentCars() throws InterruptedException, ExecutionException {
-        ExecutorService executorService = Executors.newFixedThreadPool(2);
-        try {
-            executorService.submit(() -> lockService.acquireLock(licencePlate, userId1));
-            executorService.submit(() -> lockService.acquireLock(licencePlate+"diff", userId2));
-        } finally {
-            executorService.shutdown();
-        }
-        executorService.awaitTermination(5, TimeUnit.SECONDS);
-        assertThat(pessimisticLockRepository.findAll().size()).isEqualTo(2);
-    }
 }
