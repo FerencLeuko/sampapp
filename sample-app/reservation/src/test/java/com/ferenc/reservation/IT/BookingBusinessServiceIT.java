@@ -1,6 +1,8 @@
-package com.ferenc.reservation.businessservice;
+package com.ferenc.reservation.IT;
 
 import com.ferenc.reservation.amqp.service.BookingEventPublishingService;
+import com.ferenc.reservation.businessservice.BookingBusinessService;
+import com.ferenc.reservation.businessservice.BookingBusinessServiceImpl;
 import com.ferenc.reservation.controller.dto.BookingRequest;
 import com.ferenc.reservation.controller.dto.DateRange;
 import com.ferenc.reservation.controller.dto.UpdateRequest;
@@ -10,6 +12,7 @@ import com.ferenc.reservation.repository.BookingRepository;
 import com.ferenc.reservation.repository.BookingSequenceHelper;
 import com.ferenc.reservation.repository.BookingSequenceRepository;
 import com.ferenc.reservation.repository.CarRepository;
+import com.ferenc.reservation.repository.lock.LockService;
 import com.ferenc.reservation.repository.model.Booking;
 import com.ferenc.reservation.repository.model.BookingSequence;
 import com.ferenc.reservation.repository.model.Car;
@@ -35,7 +38,7 @@ import static org.mockito.Mockito.verify;
 @ContextConfiguration
 @Profile("test")
 @Tag("IntegrationTest")
-class BookingBusinessServiceTest {
+class BookingBusinessServiceIT {
 	
     private static final int TEST_BOOKING_ID = 1;
     private static final String TEST_USER_ID = "abc@google.com";

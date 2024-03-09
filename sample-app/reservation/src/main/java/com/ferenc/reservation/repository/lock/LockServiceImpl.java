@@ -30,7 +30,7 @@ public class LockServiceImpl implements LockService {
 
     @Override
     @Transactional
-    @Retryable(value = {DataAccessException.class}, maxAttempts = 4, backoff = @Backoff(delay = 300))
+    @Retryable(value = {DataAccessException.class}, maxAttempts = 4, backoff = @Backoff(delay = 400))
     public boolean acquireLock(String licencePlate, String userId) {
         PessimisticLock existingLock = pessimisticLockRepository.findById(licencePlate).orElse(null);
         if (existingLock != null) {
