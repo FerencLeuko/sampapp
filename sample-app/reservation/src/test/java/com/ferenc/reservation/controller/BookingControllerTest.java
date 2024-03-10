@@ -31,7 +31,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(controllers = BookingController.class)
 @ActiveProfiles(value = "test")
 @AutoConfigureMockMvc(addFilters = false)
-public class BookingControllerTest {
+class BookingControllerTest {
 	
         private static final String TEST_USER_ID = "abc@google.com";
         private static final int TEST_BOOKING_ID = 0;

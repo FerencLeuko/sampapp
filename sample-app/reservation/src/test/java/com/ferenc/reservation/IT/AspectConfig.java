@@ -9,6 +9,6 @@ import org.springframework.context.annotation.Profile;
 @EnableAspectJAutoProxy
 @Profile("test")
 @Tag("IntegrationTest")
-public class AspectConfig {
+class AspectConfig {
 
 }

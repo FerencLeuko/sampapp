@@ -33,7 +33,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(controllers = CarController.class)
 @ActiveProfiles(value = "test")
 @AutoConfigureMockMvc(addFilters = false)
-public class CarControllerTest {
+class CarControllerTest {
 
     private CarTypeMapper carTypeMapper = CarController.getCarTypeMapper();
 	

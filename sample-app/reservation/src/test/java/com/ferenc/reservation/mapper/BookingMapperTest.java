@@ -11,7 +11,7 @@ import org.mapstruct.factory.*;
 
 import java.time.LocalDate;
 
-public class BookingMapperTest {
+class BookingMapperTest {
 
     private BookingMapper bookingMapper = Mappers.getMapper(BookingMapper.class);
 

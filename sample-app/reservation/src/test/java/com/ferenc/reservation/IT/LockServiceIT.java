@@ -32,7 +32,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ContextConfiguration
 @Profile("test")
 @Tag("IntegrationTest")
-public class LockServiceIT {
+class LockServiceIT {
 
     @Autowired
     private BookingBusinessService bookingService;
