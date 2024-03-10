@@ -14,7 +14,7 @@ import uk.co.jemos.podam.api.PodamFactoryImpl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
-public class ResponseCreatingHandlerTest {
+class ResponseCreatingHandlerTest {
 
     @Autowired
     private ResponseCreatingHandler responseCreatingHandler;

@@ -6,7 +6,7 @@ import com.tngtech.archunit.junit.*;
 import com.tngtech.archunit.lang.*;
 
 @AnalyzeClasses(packages = "com.ferenc.messaging")
-public class ArchRuleTest
+class ArchRuleTest
 {
 	@ArchTest
 	static final ArchRule flows_should_reside_in_integration_package = classes()

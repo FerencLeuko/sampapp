@@ -8,16 +8,11 @@ import com.ferenc.reservation.repository.model.Booking;
 import com.ferenc.reservation.repository.model.BookingSequence;
 import com.ferenc.reservation.repository.model.Car;
 import com.ferenc.reservation.repository.model.CarTypeEnum;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Profile;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -29,9 +24,9 @@ import java.util.concurrent.TimeUnit;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
-@ContextConfiguration
-@Profile("test")
+@ActiveProfiles("test")
 @Tag("IntegrationTest")
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class LockServiceIT {
 
     @Autowired
@@ -68,7 +63,6 @@ class LockServiceIT {
         carRepository.save(car2);
         Car car3 = new Car("ABC125","Opel","Astra", CarTypeEnum.STATION_WAGON,5);
         carRepository.save(car3);
-        bookingRepository.deleteAll();
     }
 
     @AfterEach
@@ -80,7 +74,7 @@ class LockServiceIT {
     }
 
     @Test
-    @DirtiesContext
+    @Order(1)
     public void testConcurrentBooking() throws InterruptedException, ExecutionException {
         ExecutorService executorService = Executors.newFixedThreadPool(2);
         try {
@@ -98,7 +92,7 @@ class LockServiceIT {
     }
 
     @Test
-    @DirtiesContext
+    @Order(2)
     public void testConcurrentBookingSameDates() throws InterruptedException, ExecutionException {
         ExecutorService executorService = Executors.newFixedThreadPool(2);
         try {
@@ -113,7 +107,7 @@ class LockServiceIT {
     }
 
     @Test
-    @DirtiesContext
+    @Order(3)
     public void testConcurrentLocking() throws InterruptedException, ExecutionException {
         ExecutorService executorService = Executors.newFixedThreadPool(2);
         try {
@@ -127,7 +121,7 @@ class LockServiceIT {
     }
 
     @Test
-    @DirtiesContext
+    @Order(4)
     public void testConcurrentLockingDifferentCars() throws InterruptedException, ExecutionException {
         ExecutorService executorService = Executors.newFixedThreadPool(2);
         try {

@@ -20,7 +20,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 @SpringBootTest
-public class EmailSendingHandlerTest {
+class EmailSendingHandlerTest {
 
     @Mock
     private JavaMailSender emailSender;
