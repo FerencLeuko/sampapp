@@ -15,7 +15,7 @@ import java.time.Instant;
 @Component
 @ActiveProfiles("test")
 @Tag("IntegrationTest")
-public class LockAspect {
+class LockAspect {
 
     @Before("execution(* com.ferenc.reservation.repository.lock.LockService.acquireLock(..))")
     public void beforeAcquireLock(JoinPoint joinPoint) {

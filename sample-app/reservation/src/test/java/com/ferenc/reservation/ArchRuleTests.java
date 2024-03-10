@@ -10,7 +10,7 @@ import org.springframework.stereotype.*;
 import org.springframework.web.bind.annotation.*;
 
 @AnalyzeClasses(packages = "com.ferenc.reservation", importOptions =  ImportOption.DoNotIncludeTests.class)
-public class ArchRuleTests
+class ArchRuleTests
 {
 	@ArchTest
 	static final ArchRule layers =

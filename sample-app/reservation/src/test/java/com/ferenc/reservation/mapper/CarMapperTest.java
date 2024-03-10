@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.*;
 
-public class CarMapperTest {
+class CarMapperTest {
 	
     private final CarMapper carMapper = Mappers.getMapper(CarMapper.class);
 
