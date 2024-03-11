@@ -25,7 +25,6 @@ public class LockServiceImpl implements LockService {
 
     @Override
     @Transactional
-    @Retryable(value = { DuplicateKeyException.class }, maxAttempts = 3, backoff = @Backoff(delay = 500))
     public boolean acquireLock(String licencePlate, String userId) {
         String lockKey = LOCK_PREFIX + licencePlate;
 
@@ -40,6 +39,7 @@ public class LockServiceImpl implements LockService {
     }
 
     @Override
+    @Transactional
     public void releaseLock(String licencePlate, String userId) {
         String lockKey = LOCK_PREFIX + licencePlate;
 

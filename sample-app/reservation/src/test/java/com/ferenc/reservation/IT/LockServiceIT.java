@@ -2,7 +2,10 @@ package com.ferenc.reservation.IT;
 
 import com.ferenc.reservation.amqp.service.BookingEventPublishingService;
 import com.ferenc.reservation.businessservice.BookingBusinessService;
-import com.ferenc.reservation.repository.*;
+import com.ferenc.reservation.repository.BookingRepository;
+import com.ferenc.reservation.repository.BookingSequenceHelper;
+import com.ferenc.reservation.repository.BookingSequenceRepository;
+import com.ferenc.reservation.repository.CarRepository;
 import com.ferenc.reservation.repository.lock.LockService;
 import com.ferenc.reservation.repository.model.Booking;
 import com.ferenc.reservation.repository.model.BookingSequence;
@@ -15,8 +18,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Profile;
-import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 
 import java.time.LocalDate;
@@ -30,9 +32,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @ContextConfiguration
-@Profile("test")
+@ActiveProfiles("test")
 @Tag("IntegrationTest")
-public class LockServiceIT {
+class LockServiceIT {
 
     @Autowired
     private BookingBusinessService bookingService;
@@ -77,7 +79,6 @@ public class LockServiceIT {
     }
 
     @Test
-    @DirtiesContext
     public void testConcurrentBooking() throws InterruptedException, ExecutionException {
         ExecutorService executorService = Executors.newFixedThreadPool(2);
         try {
@@ -95,7 +96,6 @@ public class LockServiceIT {
     }
 
     @Test
-    @DirtiesContext
     public void testConcurrentBookingSameDates() throws InterruptedException, ExecutionException {
         ExecutorService executorService = Executors.newFixedThreadPool(2);
         try {

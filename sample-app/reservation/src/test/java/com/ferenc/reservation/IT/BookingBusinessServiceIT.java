@@ -25,7 +25,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Profile;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 
 import java.time.LocalDate;
@@ -36,7 +36,7 @@ import static org.mockito.Mockito.verify;
 
 @SpringBootTest
 @ContextConfiguration
-@Profile("test")
+@ActiveProfiles("test")
 @Tag("IntegrationTest")
 class BookingBusinessServiceIT {
 	
