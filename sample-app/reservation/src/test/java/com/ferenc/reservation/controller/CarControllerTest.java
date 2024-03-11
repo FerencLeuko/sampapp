@@ -49,7 +49,7 @@ class CarControllerTest {
     private CarBusinessService carBusinessService;
 
     @AfterEach
-    private void verifyAll(){
+    public void verifyAll(){
         Mockito.verifyNoMoreInteractions(carBusinessService);
     }
 

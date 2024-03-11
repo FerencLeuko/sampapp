@@ -26,7 +26,7 @@ class EmailSendingHandlerTest {
     private JavaMailSender emailSender;
     
     @AfterEach
-	private void verifyMocks(){
+    public void verifyMocks(){
     	verifyNoMoreInteractions(emailSender);
 	}
 
