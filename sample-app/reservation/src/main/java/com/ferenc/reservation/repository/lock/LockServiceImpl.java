@@ -11,6 +11,8 @@ import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
@@ -22,15 +24,14 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class LockServiceImpl implements LockService {
 
-    private static final int EXPIRY_TIME_MS = 5000;
+    private static final int EXPIRY_TIME_MS = 4000;
 
     private final Logger logger = LoggerFactory.getLogger(LockService.class);
 
     private final PessimisticLockRepository pessimisticLockRepository;
 
     @Override
-    @Transactional
-    @Retryable(value = {DataAccessException.class}, maxAttempts = 4, backoff = @Backoff(delay = 400))
+    @Transactional()
     public boolean acquireLock(String licencePlate, String userId) {
         PessimisticLock existingLock = pessimisticLockRepository.findById(licencePlate).orElse(null);
         if (existingLock != null) {
@@ -45,6 +46,7 @@ public class LockServiceImpl implements LockService {
     }
 
     @Override
+    @Transactional()
     public void releaseLock(String licencePlate, String userId) {
         Optional<PessimisticLock> existingLock = pessimisticLockRepository.findById(licencePlate);
         if(existingLock.isPresent()){

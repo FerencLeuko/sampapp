@@ -12,7 +12,12 @@ import com.ferenc.reservation.repository.model.Car;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataAccessException;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
@@ -32,7 +37,8 @@ public class BookingBusinessServiceImpl implements BookingBusinessService {
     private final LockService lockService;
 
     @Override
-    @Transactional
+    @Transactional()
+    @Retryable(retryFor = DataAccessException.class, maxAttempts = 4, backoff = @Backoff(delay = 500))
     public Booking createBooking(String userId, String licencePlate, LocalDate startDate, LocalDate endDate) {
         Car car = carRepository.findByLicencePlate(licencePlate)
                 .orElseThrow(() -> new CarNotAvailableException("This car is not available in our system: " + licencePlate +"."));
@@ -77,7 +83,7 @@ public class BookingBusinessServiceImpl implements BookingBusinessService {
     }
 
     @Override
-    @Transactional
+    @Retryable(retryFor = DataAccessException.class, maxAttempts = 4, backoff = @Backoff(delay = 300))
     public Booking updateBooking(Integer bookingId, LocalDate startDate, LocalDate endDate) {
         Booking booking = getBooking(bookingId);
         String licencePlate = booking.getCar().getLicencePlate();
