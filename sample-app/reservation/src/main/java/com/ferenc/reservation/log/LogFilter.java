@@ -47,4 +47,8 @@ public class LogFilter extends TurboFilter {
         }
         return false;
     }
+
+    protected Set<String> getExcludedPackages() {
+        return excludedPackages;
+    }
 }
