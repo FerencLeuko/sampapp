@@ -18,13 +18,14 @@ import uk.co.jemos.podam.api.PodamFactoryImpl;
 @SpringBootTest
 class ResponseCreatingHandlerTest {
 
+    private static final PodamFactory PODAM_FACTORY = new PodamFactoryImpl();
+
     @Autowired
     private ResponseCreatingHandler responseCreatingHandler;
 
     @Test
     void testHandle() {
-        PodamFactory factory = new PodamFactoryImpl();
-        BookingEvent bookingEvent = factory.manufacturePojo(BookingEvent.class);
+        BookingEvent bookingEvent = PODAM_FACTORY.manufacturePojo(BookingEvent.class);
         Message<BookingEvent> bookingEventMessage = new GenericMessage<>(bookingEvent);
         Message<EmailDeliveryEvent> actual = responseCreatingHandler.handle(bookingEventMessage);
 
