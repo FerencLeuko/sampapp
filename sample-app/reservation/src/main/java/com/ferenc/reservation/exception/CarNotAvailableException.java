@@ -17,5 +17,4 @@ public class CarNotAvailableException extends IllegalArgumentException {
         super(cause);
     }
 
-
 }

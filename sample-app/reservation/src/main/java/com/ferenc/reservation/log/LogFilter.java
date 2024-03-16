@@ -6,7 +6,6 @@ import java.util.Set;
 import jakarta.annotation.Nullable;
 
 import org.slf4j.Marker;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
 
 import ch.qos.logback.classic.Level;
@@ -20,7 +19,7 @@ import ch.qos.logback.core.spi.FilterReply;
 @Component
 public class LogFilter extends TurboFilter {
 
-    private final Set<String> excludedPackages = Set.of("org.springframework","org.apache");
+    private final Set<String> excludedPackages = Set.of("org.springframework", "org.apache");
 
     @Override
     public FilterReply decide(final Marker marker, final Logger logger, final Level level, final String format,

@@ -1,7 +1,5 @@
 package com.ferenc.messaging.integration.handler;
 
-import com.ferenc.commons.event.BookingEvent;
-import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,6 +10,9 @@ import org.springframework.messaging.Message;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 
+import com.ferenc.commons.event.BookingEvent;
+
+import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
@@ -37,7 +38,7 @@ public class EmailSendingHandler {
         simpleMailMessage.setSubject(subject);
         simpleMailMessage.setText(content);
         emailSender.send(simpleMailMessage);
-        logger.info("Email has been created, bookingId: {}" , event.getBookingId());
+        logger.info("Email has been created, bookingId: {}", event.getBookingId());
         return message;
     }
 }

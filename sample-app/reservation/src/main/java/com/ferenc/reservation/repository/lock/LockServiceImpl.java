@@ -1,24 +1,19 @@
 package com.ferenc.reservation.repository.lock;
 
-import com.ferenc.reservation.repository.PessimisticLockRepository;
-import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.dao.DataAccessException;
-import org.springframework.dao.DuplicateKeyException;
-import org.springframework.data.mongodb.MongoTransactionManager;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.ferenc.reservation.repository.PessimisticLockRepository;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -35,7 +30,7 @@ public class LockServiceImpl implements LockService {
     public boolean acquireLock(String licencePlate, String userId) {
         PessimisticLock existingLock = pessimisticLockRepository.findById(licencePlate).orElse(null);
         if (existingLock != null) {
-            throw new DuplicateKeyException(String.format("Car %s currently not available.", licencePlate ));
+            throw new DuplicateKeyException(String.format("Car %s currently not available.", licencePlate));
         }
         PessimisticLock pessimisticLock = new PessimisticLock();
         pessimisticLock.setId(licencePlate);
@@ -49,8 +44,8 @@ public class LockServiceImpl implements LockService {
     @Transactional()
     public void releaseLock(String licencePlate, String userId) {
         Optional<PessimisticLock> existingLock = pessimisticLockRepository.findById(licencePlate);
-        if(existingLock.isPresent()){
-            if(existingLock.get().getUserId().equals(userId)) {
+        if (existingLock.isPresent()) {
+            if (existingLock.get().getUserId().equals(userId)) {
                 Date createdDate = existingLock.get().getCreatedDate();
                 Date now = new Date();
                 pessimisticLockRepository.delete(existingLock.get());
@@ -65,7 +60,7 @@ public class LockServiceImpl implements LockService {
         Instant expiration = now.minusMillis(EXPIRY_TIME_MS);
 
         List<PessimisticLock> expiredLocks = pessimisticLockRepository.findByCreatedDateBefore(Date.from(expiration));
-        if(expiredLocks.size()>0) {
+        if (!expiredLocks.isEmpty()) {
             pessimisticLockRepository.deleteAll(expiredLocks);
             logger.info("Locks deleted: {}, at {}.", expiredLocks.size(), now);
         }

@@ -15,7 +15,7 @@ public class ErrorLogHandler {
     @ServiceActivator
     public ErrorMessage handle(ErrorMessage errorMessage) {
         MessagingException exception = (MessagingException) errorMessage.getPayload();
-        logger.error("Error, failed message: {} , cause: {}",exception.getFailedMessage().getPayload(), String.valueOf(exception.getCause()));
+        logger.error("Error, failed message: {} , cause: {}", exception.getFailedMessage().getPayload(), String.valueOf(exception.getCause()));
         return errorMessage;
     }
 }

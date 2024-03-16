@@ -1,9 +1,9 @@
 package com.ferenc.reservation.amqp.service;
 
-import com.ferenc.commons.event.*;
-import com.ferenc.reservation.repository.model.*;
+import com.ferenc.commons.event.EmailDeliveryEvent;
+import com.ferenc.reservation.repository.model.EmailEventLog;
 
-public interface EmailEventLoggerService
-{
-	EmailEventLog logEmailSent( EmailDeliveryEvent emailDeliveryEvent);
+public interface EmailEventLoggerService {
+
+    EmailEventLog logEmailSent(EmailDeliveryEvent emailDeliveryEvent);
 }

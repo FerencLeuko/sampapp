@@ -3,6 +3,7 @@
 This is a demo application. Domain: company car booking.
 
 Technical aspects:
+
 - multi module SpringBoot application
 - exposing REST Api
 - Spring Security authentication with JWT using KeyCloak as issuer

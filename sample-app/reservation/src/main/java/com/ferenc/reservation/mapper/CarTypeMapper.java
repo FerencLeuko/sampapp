@@ -1,7 +1,8 @@
 package com.ferenc.reservation.mapper;
 
-import com.ferenc.reservation.controller.dto.CarTypeEnum;
 import org.mapstruct.Mapper;
+
+import com.ferenc.reservation.controller.dto.CarTypeEnum;
 
 @Mapper(componentModel = "spring")
 public interface CarTypeMapper {

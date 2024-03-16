@@ -1,7 +1,7 @@
 package com.ferenc.messaging.integration.handler;
 
-import com.ferenc.commons.event.BookingEvent;
-import com.ferenc.commons.event.EmailDeliveryEvent;
+import java.time.LocalDateTime;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.integration.annotation.ServiceActivator;
@@ -9,7 +9,8 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.support.GenericMessage;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
+import com.ferenc.commons.event.BookingEvent;
+import com.ferenc.commons.event.EmailDeliveryEvent;
 
 @Component
 public class ResponseCreatingHandler {

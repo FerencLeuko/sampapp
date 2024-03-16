@@ -1,22 +1,23 @@
 package com.ferenc.reservation.mapper;
 
+import java.time.LocalDate;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.mapstruct.factory.Mappers;
+
 import com.ferenc.reservation.controller.dto.BookingDto;
 import com.ferenc.reservation.controller.dto.CarDto;
 import com.ferenc.reservation.controller.dto.CarTypeEnum;
 import com.ferenc.reservation.repository.model.Booking;
 import com.ferenc.reservation.repository.model.Car;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.mapstruct.factory.*;
-
-import java.time.LocalDate;
 
 class BookingMapperTest {
 
     private BookingMapper bookingMapper = Mappers.getMapper(BookingMapper.class);
 
     @Test
-    void testMapping(){
+    void testMapping() {
         CarDto carDto = new CarDto();
         carDto.setLicencePlate("ABC-123");
         carDto.setManufacturer("Opel");
@@ -45,10 +46,10 @@ class BookingMapperTest {
 
         BookingDto actual = bookingMapper.fromModel(model);
 
-        Assertions.assertEquals(expected.getBookingId(),actual.getBookingId());
+        Assertions.assertEquals(expected.getBookingId(), actual.getBookingId());
         Assertions.assertEquals(expected.getUserId(), actual.getUserId());
-        Assertions.assertEquals(expected.getStartDate(),actual.getStartDate());
-        Assertions.assertEquals(expected.getEndDate(),actual.getEndDate());
-        Assertions.assertEquals(expected.getCar(),actual.getCar());
+        Assertions.assertEquals(expected.getStartDate(), actual.getStartDate());
+        Assertions.assertEquals(expected.getEndDate(), actual.getEndDate());
+        Assertions.assertEquals(expected.getCar(), actual.getCar());
     }
 }
