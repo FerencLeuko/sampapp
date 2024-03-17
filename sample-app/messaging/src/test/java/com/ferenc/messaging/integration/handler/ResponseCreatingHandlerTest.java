@@ -1,26 +1,22 @@
-package com.ferenc.messaging.handler;
+package com.ferenc.messaging.integration.handler;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.GenericMessage;
 
 import com.ferenc.commons.event.BookingEvent;
 import com.ferenc.commons.event.EmailDeliveryEvent;
-import com.ferenc.messaging.integration.handler.ResponseCreatingHandler;
+import com.ferenc.messaging.integration.AbstractTest;
 
-import uk.co.jemos.podam.api.PodamFactory;
-import uk.co.jemos.podam.api.PodamFactoryImpl;
+@ExtendWith({ MockitoExtension.class })
+class ResponseCreatingHandlerTest extends AbstractTest {
 
-@SpringBootTest
-class ResponseCreatingHandlerTest {
-
-    private static final PodamFactory PODAM_FACTORY = new PodamFactoryImpl();
-
-    @Autowired
+    @InjectMocks
     private ResponseCreatingHandler responseCreatingHandler;
 
     @Test
