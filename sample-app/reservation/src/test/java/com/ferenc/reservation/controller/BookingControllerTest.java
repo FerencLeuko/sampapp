@@ -22,10 +22,10 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ferenc.reservation.AbstractTest;
 import com.ferenc.reservation.auth.SecurityUtils;
 import com.ferenc.reservation.businessservice.BookingBusinessService;
 import com.ferenc.reservation.controller.dto.BookingRequest;
-import com.ferenc.reservation.controller.dto.DateRange;
 import com.ferenc.reservation.controller.dto.UpdateRequest;
 import com.ferenc.reservation.mapper.BookingMapper;
 import com.ferenc.reservation.mapper.CarMapper;
@@ -35,7 +35,7 @@ import com.ferenc.reservation.repository.model.Booking;
 @WebMvcTest(controllers = BookingController.class)
 @ActiveProfiles(value = "test")
 @AutoConfigureMockMvc(addFilters = false)
-class BookingControllerTest {
+class BookingControllerTest extends AbstractTest {
 
     private static final String TEST_USER_ID = "abc@google.com";
     private static final int TEST_BOOKING_ID = 0;
@@ -54,23 +54,6 @@ class BookingControllerTest {
 
     @MockBean
     private BookingBusinessService bookingBusinessService;
-
-    private static BookingRequest getValidBookingRequest() {
-        BookingRequest bookingRequest = new BookingRequest();
-        bookingRequest.setLicencePlate("ABC123");
-        LocalDate startDate = LocalDate.now();
-        LocalDate endDate = LocalDate.now();
-        DateRange dateRange = new DateRange(startDate, endDate);
-        bookingRequest.setDateRange(dateRange);
-        return bookingRequest;
-    }
-
-    private static UpdateRequest getValidUpdateRequest() {
-        UpdateRequest updateRequest = new UpdateRequest();
-        DateRange dateRange = new DateRange(LocalDate.now(), LocalDate.now());
-        updateRequest.setDateRange(dateRange);
-        return updateRequest;
-    }
 
     private static Booking getMockBooking(Integer bookingId) {
         Booking booking = new Booking();

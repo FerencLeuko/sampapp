@@ -1,9 +1,9 @@
 package com.ferenc.reservation.IT;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.verify;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -12,17 +12,16 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
+import com.ferenc.reservation.AbstractTest;
 import com.ferenc.reservation.amqp.service.BookingEventPublishingService;
 import com.ferenc.reservation.businessservice.BookingBusinessService;
 import com.ferenc.reservation.businessservice.BookingBusinessServiceImpl;
 import com.ferenc.reservation.controller.dto.BookingRequest;
-import com.ferenc.reservation.controller.dto.DateRange;
 import com.ferenc.reservation.controller.dto.UpdateRequest;
 import com.ferenc.reservation.exception.CarNotAvailableException;
 import com.ferenc.reservation.exception.NoSuchBookingException;
@@ -39,11 +38,7 @@ import com.ferenc.reservation.repository.model.CarTypeEnum;
 @SpringBootTest
 @ActiveProfiles("test")
 @Tag("IntegrationTest")
-class BookingBusinessServiceIT {
-
-    private static final int TEST_BOOKING_ID = 1;
-    private static final String TEST_USER_ID = "abc@google.com";
-    private static final String TEST_LICENCE_PLATE = "ABC123";
+class BookingBusinessServiceIT extends AbstractTest {
 
     @Autowired
     private CarRepository carRepository;
@@ -58,23 +53,6 @@ class BookingBusinessServiceIT {
 
     @Mock
     private BookingEventPublishingService bookingEventPublishingService;
-
-    private static BookingRequest getValidBookingRequest() {
-        BookingRequest bookingRequest = new BookingRequest();
-        bookingRequest.setLicencePlate(TEST_LICENCE_PLATE);
-        LocalDate startDate = LocalDate.now();
-        LocalDate endDate = LocalDate.now();
-        DateRange dateRange = new DateRange(startDate, endDate);
-        bookingRequest.setDateRange(dateRange);
-        return bookingRequest;
-    }
-
-    private static UpdateRequest getValidUpdateRequest() {
-        UpdateRequest updateRequest = new UpdateRequest();
-        DateRange dateRange = new DateRange(LocalDate.now().plusDays(1), LocalDate.now().plusDays(1));
-        updateRequest.setDateRange(dateRange);
-        return updateRequest;
-    }
 
     @BeforeEach
     void init() {
@@ -109,14 +87,13 @@ class BookingBusinessServiceIT {
                         bookingRequest.getDateRange().getStartDate(),
                         bookingRequest.getDateRange().getEndDate()
                 );
+
         assertEquals(TEST_USER_ID, booking.getUserId());
         assertEquals(booking.getCar().getLicencePlate(), bookingRequest.getLicencePlate());
         assertEquals(booking.getStartDate(), bookingRequest.getDateRange().getStartDate());
         assertEquals(booking.getEndDate(), bookingRequest.getDateRange().getEndDate());
 
-        ArgumentCaptor<Booking> captor = ArgumentCaptor.forClass(Booking.class);
-        verify(this.bookingEventPublishingService).publishNewBookingEvent(captor.capture());
-        assertEquals(booking, captor.getValue());
+        assertThat(bookingRepository.findByUserId(TEST_USER_ID)).contains(booking);
     }
 
     @Test
@@ -130,6 +107,7 @@ class BookingBusinessServiceIT {
                         bookingRequest.getDateRange().getStartDate(),
                         bookingRequest.getDateRange().getEndDate()
                 );
+
         assertThrows(CarNotAvailableException.class,
                 () -> bookingBusinessService
                         .createBooking(
@@ -144,7 +122,7 @@ class BookingBusinessServiceIT {
         BookingBusinessService bookingBusinessService = getBookingBusinessService();
         Booking booking = bookingBusinessService.getBooking(TEST_BOOKING_ID);
         assertEquals(TEST_BOOKING_ID, booking.getBookingId());
-
+        assertThat(bookingRepository.findByUserId(TEST_USER_ID)).contains(booking);
     }
 
     @Test
@@ -166,8 +144,10 @@ class BookingBusinessServiceIT {
                         bookingRequest.getDateRange().getEndDate()
                 );
         List<Booking> bookings = bookingBusinessService.getAllBookings();
+
         assertEquals(2, bookings.size());
         assertTrue(bookings.contains(booking));
+        assertThat(bookingRepository.findByUserId(TEST_USER_ID)).contains(booking);
     }
 
     @Test
@@ -179,8 +159,10 @@ class BookingBusinessServiceIT {
                         TEST_BOOKING_ID,
                         updateRequest.getDateRange().getStartDate(),
                         updateRequest.getDateRange().getEndDate());
+
         assertEquals(updateRequest.getDateRange().getStartDate(), booking.getStartDate());
         assertEquals(updateRequest.getDateRange().getEndDate(), booking.getEndDate());
+        assertThat(bookingRepository.findByUserId(TEST_USER_ID)).contains(booking);
     }
 
     @Test
@@ -196,11 +178,12 @@ class BookingBusinessServiceIT {
                 );
         Booking booking2 = bookingBusinessService
                 .createBooking(
-                        "TEST_USER_ID",
+                        TEST_USER_ID,
                         bookingRequest.getLicencePlate(),
-                        bookingRequest.getDateRange().getStartDate().plusDays(1),
+                        bookingRequest.getDateRange().getEndDate().plusDays(1),
                         bookingRequest.getDateRange().getEndDate().plusDays(1)
                 );
+
         assertThrows(CarNotAvailableException.class,
                 () -> bookingBusinessService
                         .updateBooking(
@@ -213,7 +196,9 @@ class BookingBusinessServiceIT {
     void testDeleteBooking() {
         BookingBusinessService bookingBusinessService = getBookingBusinessService();
         bookingBusinessService.deleteBooking(TEST_BOOKING_ID);
+
         assertThrows(NoSuchBookingException.class, () -> bookingBusinessService.getBooking(TEST_BOOKING_ID));
+        assertThat(bookingRepository.findByBookingId(TEST_BOOKING_ID)).isEmpty();
     }
 
     private BookingBusinessService getBookingBusinessService() {

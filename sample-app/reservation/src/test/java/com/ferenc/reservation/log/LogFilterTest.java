@@ -11,18 +11,15 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Marker;
 
+import com.ferenc.reservation.AbstractTest;
 import com.ferenc.reservation.exception.NoSuchBookingException;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.core.spi.FilterReply;
-import uk.co.jemos.podam.api.PodamFactory;
-import uk.co.jemos.podam.api.PodamFactoryImpl;
 
 @ExtendWith({ MockitoExtension.class })
-class LogFilterTest {
-
-    private static final PodamFactory PODAM_FACTORY = new PodamFactoryImpl();
+class LogFilterTest extends AbstractTest {
 
     @InjectMocks
     LogFilter logFilter;

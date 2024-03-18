@@ -22,11 +22,10 @@ import com.ferenc.messaging.integration.AbstractTest;
 @ExtendWith({ MockitoExtension.class })
 class EmailSendingHandlerTest extends AbstractTest {
 
-    @Mock
-    private JavaMailSender emailSender;
-
     @InjectMocks
     EmailSendingHandler emailSendingHandler;
+    @Mock
+    private JavaMailSender emailSender;
 
     @AfterEach
     public void verifyMocks() {

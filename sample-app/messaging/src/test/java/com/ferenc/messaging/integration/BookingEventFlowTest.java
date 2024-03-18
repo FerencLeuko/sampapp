@@ -31,6 +31,8 @@ import com.ferenc.messaging.integration.handler.ResponseCreatingHandler;
 @IntegrationComponentScan("com.ferenc.messaging")
 class BookingEventFlowTest extends AbstractTest {
 
+    public static final String INBOUND_CHANNEL = "inboundChannel";
+    public static final int TIME_OUT = 1000;
     private InOrder inOrder;
 
     @MockBean
@@ -61,12 +63,14 @@ class BookingEventFlowTest extends AbstractTest {
         mockGateway.send(expected);
 
         ArgumentCaptor<Message<BookingEvent>> emailMessageCaptor = ArgumentCaptor.forClass(Message.class);
-        inOrder.verify(emailSendingHandler, timeout(1000)).handle(emailMessageCaptor.capture());
+        inOrder.verify(emailSendingHandler, timeout(TIME_OUT)).handle(emailMessageCaptor.capture());
+
         Message<BookingEvent> capturedMessageForEmail = emailMessageCaptor.getValue();
         assertThat(expected.getPayload()).isEqualTo(capturedMessageForEmail.getPayload());
 
         ArgumentCaptor<Message<BookingEvent>> responseMessageCaptor = ArgumentCaptor.forClass(Message.class);
-        inOrder.verify(responseCreatingHandler, timeout(1000)).handle(responseMessageCaptor.capture());
+        inOrder.verify(responseCreatingHandler, timeout(TIME_OUT)).handle(responseMessageCaptor.capture());
+
         Message<BookingEvent> capturedMessageForResponse = responseMessageCaptor.getValue();
         assertThat(expected.getPayload()).isEqualTo(capturedMessageForResponse.getPayload());
     }
@@ -74,7 +78,7 @@ class BookingEventFlowTest extends AbstractTest {
     @MessagingGateway
     interface MockGateway {
 
-        @Gateway(requestChannel = "inboundChannel")
+        @Gateway(requestChannel = INBOUND_CHANNEL)
         void send(Message payload);
     }
 }
