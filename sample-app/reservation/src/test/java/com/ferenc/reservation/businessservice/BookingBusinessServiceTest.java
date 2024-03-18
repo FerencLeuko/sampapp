@@ -76,12 +76,15 @@ class BookingBusinessServiceTest extends AbstractTest {
         verify(bookingRepository).findByCarLicencePlate(car.getLicencePlate());
         verify(lockService).acquireLock(car.getLicencePlate(), expected.getUserId());
         verify(bookingSequenceHelper).getNextSequence();
-        verify(bookingRepository).save(any());
         verify(lockService).releaseLock(car.getLicencePlate(), expected.getUserId());
 
         ArgumentCaptor<Booking> captor = ArgumentCaptor.forClass(Booking.class);
-        verify(this.bookingEventPublishingService).publishNewBookingEvent(captor.capture());
-        assertEquals(expected, captor.getValue());
+        verify(bookingRepository).save(captor.capture());
+        assertEquals(captor.getValue(), expected);
+
+        ArgumentCaptor<Booking> eventCaptor = ArgumentCaptor.forClass(Booking.class);
+        verify(bookingEventPublishingService).publishNewBookingEvent(eventCaptor.capture());
+        assertEquals(eventCaptor.getValue(), expected);
     }
 
     @Test
@@ -106,8 +109,11 @@ class BookingBusinessServiceTest extends AbstractTest {
         verify(bookingRepository).findByBookingId(expected.getBookingId());
         verify(bookingRepository).findByCarLicencePlate(car.getLicencePlate());
         verify(lockService).acquireLock(car.getLicencePlate(), expected.getUserId());
-        verify(bookingRepository).save(any());
         verify(lockService).releaseLock(car.getLicencePlate(), expected.getUserId());
+
+        ArgumentCaptor<Booking> captor = ArgumentCaptor.forClass(Booking.class);
+        verify(bookingRepository).save(captor.capture());
+        assertEquals(captor.getValue(), expected);
     }
 
     @Test
