@@ -4,20 +4,28 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 
+import com.ferenc.commons.event.BookingEvent;
 import com.ferenc.reservation.AbstractTest;
+import com.ferenc.reservation.amqp.AmqpConfiguration;
 import com.ferenc.reservation.amqp.service.BookingEventPublishingService;
 import com.ferenc.reservation.businessservice.BookingBusinessService;
 import com.ferenc.reservation.businessservice.BookingBusinessServiceImpl;
@@ -50,9 +58,12 @@ class BookingBusinessServiceIT extends AbstractTest {
     private BookingSequenceRepository bookingSequenceRepository;
     @Autowired
     private LockService lockService;
-
-    @Mock
+    @Autowired
     private BookingEventPublishingService bookingEventPublishingService;
+    @Autowired
+    AmqpConfiguration amqpConfiguration;
+    @MockBean
+    private RabbitTemplate rabbitTemplate;
 
     @BeforeEach
     void init() {
@@ -94,6 +105,24 @@ class BookingBusinessServiceIT extends AbstractTest {
         assertEquals(booking.getEndDate(), bookingRequest.getDateRange().getEndDate());
 
         assertThat(bookingRepository.findByUserId(TEST_USER_ID)).contains(booking);
+
+        BookingEvent bookingEvent =
+                BookingEvent.builder()
+                        .bookingId(booking.getBookingId())
+                        .timeCreated(LocalDateTime.now())
+                        .userId(booking.getUserId())
+                        .lisencePlate(booking.getCar().getLicencePlate())
+                        .startDate(booking.getStartDate())
+                        .endDate(booking.getEndDate())
+                        .build();
+
+        ArgumentCaptor<BookingEvent> eventCaptor = ArgumentCaptor.forClass(BookingEvent.class);
+        verify(rabbitTemplate).convertAndSend(eq(amqpConfiguration.getBookingExchangeName()),
+                eq(amqpConfiguration.getBookingRoutingKey()),eventCaptor.capture());
+        assertThat(eventCaptor.getValue())
+                .usingRecursiveComparison()
+                .ignoringFields("timeCreated")
+                .isEqualTo(bookingEvent);
     }
 
     @Test

@@ -45,7 +45,7 @@ public class CarBusinessServiceImpl implements CarBusinessService {
     @Override
     public Car getCar(String licencePlate) {
         return carRepository.findByLicencePlate(licencePlate)
-                .orElseThrow(() -> new NoSuchCarException("This car does not exists in our system: " + licencePlate + "."));
+                .orElseThrow(() -> new NoSuchCarException("This car does not exist in our system: " + licencePlate + "."));
     }
 
     @Override
