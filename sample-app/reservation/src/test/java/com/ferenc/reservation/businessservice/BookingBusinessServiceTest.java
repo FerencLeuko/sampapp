@@ -1,6 +1,7 @@
 package com.ferenc.reservation.businessservice;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
@@ -23,6 +24,7 @@ import com.ferenc.reservation.AbstractTest;
 import com.ferenc.reservation.amqp.service.BookingEventPublishingService;
 import com.ferenc.reservation.controller.dto.BookingRequest;
 import com.ferenc.reservation.controller.dto.UpdateRequest;
+import com.ferenc.reservation.exception.CarNotAvailableException;
 import com.ferenc.reservation.repository.BookingRepository;
 import com.ferenc.reservation.repository.BookingSequenceHelper;
 import com.ferenc.reservation.repository.CarRepository;
@@ -88,6 +90,33 @@ class BookingBusinessServiceTest extends AbstractTest {
     }
 
     @Test
+    void createBooking_carNotAvailable() {
+        BookingRequest bookingRequest = getValidBookingRequest();
+        Car car = PODAM_FACTORY.manufacturePojo(Car.class);
+
+        Booking expected = new Booking();
+        expected.setCar(car);
+        expected.setUserId(PODAM_FACTORY.manufacturePojo(String.class));
+        expected.setStartDate(bookingRequest.getDateRange().getStartDate());
+        expected.setEndDate(bookingRequest.getDateRange().getEndDate());
+        expected.setBookingId(PODAM_FACTORY.manufacturePojo(Integer.class));
+
+        when(carRepository.findByLicencePlate(any())).thenReturn(Optional.of(car));
+        when(bookingRepository.findByCarLicencePlate(any())).thenReturn(List.of(expected));
+        when(lockService.acquireLock(any(), any())).thenReturn(true);
+
+        assertThatThrownBy(() -> bookingBusinessService.createBooking(expected.getUserId(), car.getLicencePlate(), expected.getStartDate(),
+                        expected.getEndDate())).isInstanceOf(CarNotAvailableException.class)
+                        .hasMessage(String.format("This car: %s is not available for this time range: %s - %s.",
+                                car.getLicencePlate(), expected.getStartDate(), expected.getEndDate()));
+
+        verify(carRepository).findByLicencePlate(car.getLicencePlate());
+        verify(bookingRepository).findByCarLicencePlate(car.getLicencePlate());
+        verify(lockService).acquireLock(car.getLicencePlate(), expected.getUserId());
+        verify(lockService).releaseLock(car.getLicencePlate(), expected.getUserId());
+    }
+
+    @Test
     void updateBooking() {
         UpdateRequest updateRequest = getValidUpdateRequest();
         Car car = PODAM_FACTORY.manufacturePojo(Car.class);
@@ -114,6 +143,43 @@ class BookingBusinessServiceTest extends AbstractTest {
         ArgumentCaptor<Booking> captor = ArgumentCaptor.forClass(Booking.class);
         verify(bookingRepository).save(captor.capture());
         assertEquals(expected, captor.getValue());
+    }
+
+    @Test
+    void updateBooking_carNotAvailable() {
+        BookingRequest bookingRequest = getValidBookingRequest();
+        Car car = PODAM_FACTORY.manufacturePojo(Car.class);
+
+        Booking expected = new Booking();
+        expected.setCar(car);
+        expected.setUserId(TEST_USER_ID);
+        expected.setStartDate(bookingRequest.getDateRange().getStartDate());
+        expected.setEndDate(bookingRequest.getDateRange().getEndDate());
+        expected.setBookingId(PODAM_FACTORY.manufacturePojo(Integer.class));
+
+        Booking existing = new Booking();
+        existing.setCar(expected.getCar());
+        existing.setUserId(OTHER_USER_ID);
+        existing.setStartDate(expected.getStartDate());
+        existing.setEndDate(expected.getEndDate());
+        existing.setBookingId(PODAM_FACTORY.manufacturePojo(Integer.class));
+
+        List<Booking> existingBookings = new ArrayList<>();
+        existingBookings.add(existing);
+
+        when(bookingRepository.findByBookingId(any())).thenReturn(Optional.of(expected));
+        when(bookingRepository.findByCarLicencePlate(any())).thenReturn(existingBookings);
+        when(lockService.acquireLock(any(), any())).thenReturn(true);
+
+        assertThatThrownBy(() -> bookingBusinessService.updateBooking(expected.getBookingId(), expected.getStartDate(),
+                expected.getEndDate())).isInstanceOf(CarNotAvailableException.class)
+                .hasMessage(String.format("This car: %s is not available for this time range: %s - %s.",
+                        car.getLicencePlate(), existing.getStartDate(), existing.getEndDate()));
+
+        verify(bookingRepository).findByBookingId(expected.getBookingId());
+        verify(bookingRepository).findByCarLicencePlate(car.getLicencePlate());
+        verify(lockService).acquireLock(car.getLicencePlate(), expected.getUserId());
+        verify(lockService).releaseLock(car.getLicencePlate(), expected.getUserId());
     }
 
     @Test

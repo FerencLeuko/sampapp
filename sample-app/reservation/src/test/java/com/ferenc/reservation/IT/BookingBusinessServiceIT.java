@@ -200,7 +200,7 @@ class BookingBusinessServiceIT extends AbstractTest {
         BookingRequest bookingRequest = getValidBookingRequest();
         Booking booking1 = bookingBusinessService
                 .createBooking(
-                        "foo" + TEST_USER_ID,
+                        OTHER_USER_ID,
                         bookingRequest.getLicencePlate(),
                         bookingRequest.getDateRange().getStartDate(),
                         bookingRequest.getDateRange().getEndDate()

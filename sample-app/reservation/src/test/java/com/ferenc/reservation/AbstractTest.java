@@ -14,6 +14,7 @@ public class AbstractTest {
     protected static final PodamFactory PODAM_FACTORY = new PodamFactoryImpl();
     protected static final int TEST_BOOKING_ID = 1;
     protected static final String TEST_USER_ID = "abc@google.com";
+    protected static final String OTHER_USER_ID = "foo" + TEST_USER_ID;
     protected static final String TEST_LICENCE_PLATE = "ABC123";
     protected static final LocalDate START_DATE = LocalDate.now();
     protected static final LocalDate END_DATE = LocalDate.now().plusDays(1);
