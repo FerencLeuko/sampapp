@@ -128,8 +128,11 @@ class BookingBusinessServiceTest extends AbstractTest {
         expected.setEndDate(updateRequest.getDateRange().getEndDate());
         expected.setBookingId(PODAM_FACTORY.manufacturePojo(Integer.class));
 
+        List<Booking> existingBookings = new ArrayList<>();
+        existingBookings.add(expected);
+
         when(bookingRepository.findByBookingId(any())).thenReturn(Optional.of(expected));
-        when(bookingRepository.findByCarLicencePlate(any())).thenReturn(new ArrayList<>());
+        when(bookingRepository.findByCarLicencePlate(any())).thenReturn(existingBookings);
         when(lockService.acquireLock(any(), any())).thenReturn(true);
 
         Booking actual = bookingBusinessService.updateBooking(expected.getBookingId(), expected.getStartDate(), expected.getEndDate());
