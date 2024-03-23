@@ -241,22 +241,23 @@ class BookingBusinessServiceTest extends AbstractTest {
         BookingRequest bookingRequest = getValidBookingRequest();
         Car car = PODAM_FACTORY.manufacturePojo(Car.class);
 
-        Booking booking = new Booking();
-        booking.setCar(car);
-        booking.setUserId(PODAM_FACTORY.manufacturePojo(String.class));
-        booking.setStartDate(bookingRequest.getDateRange().getStartDate());
-        booking.setEndDate(bookingRequest.getDateRange().getEndDate());
-        booking.setBookingId(PODAM_FACTORY.manufacturePojo(Integer.class));
+        Booking expected = new Booking();
+        expected.setCar(car);
+        expected.setUserId(PODAM_FACTORY.manufacturePojo(String.class));
+        expected.setStartDate(bookingRequest.getDateRange().getStartDate());
+        expected.setEndDate(bookingRequest.getDateRange().getEndDate());
+        expected.setBookingId(PODAM_FACTORY.manufacturePojo(Integer.class));
 
-        when(bookingRepository.findByBookingId(any())).thenReturn(Optional.of(booking));
+        when(bookingRepository.findByBookingId(any())).thenReturn(Optional.of(expected));
         when(lockService.acquireLock(any(), any())).thenReturn(true);
 
-        bookingBusinessService.deleteBooking(booking.getBookingId());
+        Booking actual = bookingBusinessService.deleteBooking(expected.getBookingId());
+        assertEquals(expected, actual);
 
-        verify(bookingRepository).findByBookingId(booking.getBookingId());
-        verify(bookingRepository).deleteById(booking.getBookingId());
-        verify(lockService).acquireLock(car.getLicencePlate(), booking.getUserId());
-        verify(lockService).releaseLock(car.getLicencePlate(), booking.getUserId());
+        verify(bookingRepository).findByBookingId(expected.getBookingId());
+        verify(bookingRepository).deleteById(expected.getBookingId());
+        verify(lockService).acquireLock(car.getLicencePlate(), expected.getUserId());
+        verify(lockService).releaseLock(car.getLicencePlate(), expected.getUserId());
     }
 
     @Test
