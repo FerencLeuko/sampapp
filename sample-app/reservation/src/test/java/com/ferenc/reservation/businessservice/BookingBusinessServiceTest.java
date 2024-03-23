@@ -4,10 +4,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -223,14 +225,15 @@ class BookingBusinessServiceTest extends AbstractTest {
         booking.setEndDate(bookingRequest.getDateRange().getEndDate());
         booking.setBookingId(PODAM_FACTORY.manufacturePojo(Integer.class));
 
+        String userId = booking.getUserId();
         List<Booking> expected = List.of(booking);
 
         when(bookingRepository.findByUserId(any())).thenReturn(expected);
 
-        List<Booking> actual = bookingBusinessService.getAllBookingsByUserId(booking.getUserId());
+        List<Booking> actual = bookingBusinessService.getAllBookingsByUserId(userId);
         assertThat(expected).containsAll(actual);
 
-        verify(bookingRepository).findByUserId(booking.getUserId());
+        verify(bookingRepository).findByUserId(userId);
     }
 
     @Test
@@ -246,10 +249,77 @@ class BookingBusinessServiceTest extends AbstractTest {
         booking.setBookingId(PODAM_FACTORY.manufacturePojo(Integer.class));
 
         when(bookingRepository.findByBookingId(any())).thenReturn(Optional.of(booking));
+        when(lockService.acquireLock(any(), any())).thenReturn(true);
 
         bookingBusinessService.deleteBooking(booking.getBookingId());
 
         verify(bookingRepository).findByBookingId(booking.getBookingId());
         verify(bookingRepository).deleteById(booking.getBookingId());
+        verify(lockService).acquireLock(car.getLicencePlate(), booking.getUserId());
+        verify(lockService).releaseLock(car.getLicencePlate(), booking.getUserId());
+    }
+
+    @Test
+    void isCarAvailable_true(){
+        BookingRequest bookingRequest = getValidBookingRequest();
+        LocalDate startDate = bookingRequest.getDateRange().getStartDate();
+        LocalDate endDate = bookingRequest.getDateRange().getEndDate();
+
+        Car car = PODAM_FACTORY.manufacturePojo(Car.class);
+        String licencePlate = car.getLicencePlate();
+
+        Booking existing = new Booking();
+        existing.setCar(car);
+        existing.setUserId(OTHER_USER_ID);
+        existing.setStartDate(startDate);
+        existing.setEndDate(endDate);
+        existing.setBookingId(PODAM_FACTORY.manufacturePojo(Integer.class));
+
+        String licencePlateOther = licencePlate + PODAM_FACTORY.manufacturePojo(String.class);
+
+        List<Booking> existingBookings = new ArrayList<>();
+        existingBookings.add(existing);
+
+        when(bookingRepository.findByCarLicencePlate(licencePlate)).thenReturn(existingBookings);
+        when(bookingRepository.findByCarLicencePlate(licencePlateOther)).thenReturn(List.of());
+
+        assertThat(bookingBusinessService.isCarAvailable(licencePlate,
+                endDate.plusDays(1), endDate.plusDays(1))).isTrue();
+
+        assertThat(bookingBusinessService.isCarAvailable(licencePlateOther,
+                startDate, endDate)).isTrue();
+
+        verify(bookingRepository).findByCarLicencePlate(licencePlate);
+        verify(bookingRepository).findByCarLicencePlate(licencePlateOther);
+    }
+
+    @Test
+    void isCarAvailable_false(){
+        BookingRequest bookingRequest = getValidBookingRequest();
+        LocalDate startDate = bookingRequest.getDateRange().getStartDate();
+        LocalDate endDate = bookingRequest.getDateRange().getEndDate();
+
+        Car car = PODAM_FACTORY.manufacturePojo(Car.class);
+        String licencePlate = car.getLicencePlate();
+
+        Booking existing = new Booking();
+        existing.setCar(car);
+        existing.setUserId(OTHER_USER_ID);
+        existing.setStartDate(startDate);
+        existing.setEndDate(endDate);
+        existing.setBookingId(PODAM_FACTORY.manufacturePojo(Integer.class));
+
+        List<Booking> existingBookings = new ArrayList<>();
+        existingBookings.add(existing);
+
+        when(bookingRepository.findByCarLicencePlate(any())).thenReturn(existingBookings);
+
+        assertThat(bookingBusinessService.isCarAvailable(licencePlate,
+                endDate, endDate.plusDays(1))).isFalse();
+
+        assertThat(bookingBusinessService.isCarAvailable(licencePlate,
+                startDate.minusDays(1), startDate)).isFalse();
+
+        verify(bookingRepository, times(2)).findByCarLicencePlate(licencePlate);
     }
 }

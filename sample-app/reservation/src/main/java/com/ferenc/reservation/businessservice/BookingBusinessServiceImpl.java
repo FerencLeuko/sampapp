@@ -50,7 +50,7 @@ public class BookingBusinessServiceImpl implements BookingBusinessService {
 
         if (lockService.acquireLock(licencePlate, booking.getUserId())) {
             try {
-                if (!isCarAvailable(licencePlate, startDate, endDate)) {
+                if (!isCarAvailable(licencePlate, startDate, endDate, Optional.empty())) {
                     throw new CarNotAvailableException(
                             "This car: " + licencePlate + " is not available for this time range: " + startDate + " - " + endDate + ".");
                 }
@@ -84,6 +84,7 @@ public class BookingBusinessServiceImpl implements BookingBusinessService {
     }
 
     @Override
+    @Transactional()
     @Retryable(retryFor = DataAccessException.class, maxAttempts = 4, backoff = @Backoff(delay = 300))
     public Booking updateBooking(Integer bookingId, LocalDate startDate, LocalDate endDate) {
         Booking booking = getBooking(bookingId);
@@ -108,10 +109,21 @@ public class BookingBusinessServiceImpl implements BookingBusinessService {
     }
 
     @Override
+    @Transactional()
+    @Retryable(retryFor = DataAccessException.class, maxAttempts = 4, backoff = @Backoff(delay = 300))
     public Booking deleteBooking(Integer bookingId) {
         Booking bookingToDelete = getBooking(bookingId);
-        bookingRepository.deleteById(bookingId);
-        logger.info("Booking has been deleted, bookingId: {}", bookingToDelete.getBookingId());
+        String licencePlate = bookingToDelete.getCar().getLicencePlate();
+        String userId = bookingToDelete.getUserId();
+
+        if (lockService.acquireLock(licencePlate, userId)) {
+            try {
+                bookingRepository.deleteById(bookingId);
+            } finally {
+                lockService.releaseLock(licencePlate, userId);
+            }
+        }
+        logger.info("Booking has been deleted, bookingId: {}", bookingId);
         return bookingToDelete;
     }
 
