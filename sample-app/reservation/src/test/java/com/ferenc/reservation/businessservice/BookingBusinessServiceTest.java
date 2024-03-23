@@ -320,6 +320,9 @@ class BookingBusinessServiceTest extends AbstractTest {
         assertThat(bookingBusinessService.isCarAvailable(licencePlate,
                 startDate.minusDays(1), startDate)).isFalse();
 
-        verify(bookingRepository, times(2)).findByCarLicencePlate(licencePlate);
+        assertThat(bookingBusinessService.isCarAvailable(licencePlate,
+                startDate.minusDays(1), endDate.plusDays(1))).isFalse();
+
+        verify(bookingRepository, times(3)).findByCarLicencePlate(licencePlate);
     }
 }
