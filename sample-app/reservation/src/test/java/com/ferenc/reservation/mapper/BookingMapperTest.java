@@ -2,16 +2,12 @@ package com.ferenc.reservation.mapper;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.time.LocalDate;
-
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 
 import com.ferenc.reservation.AbstractTest;
 import com.ferenc.reservation.controller.dto.BookingDto;
 import com.ferenc.reservation.controller.dto.CarDto;
-import com.ferenc.reservation.controller.dto.CarTypeEnum;
 import com.ferenc.reservation.repository.model.Booking;
 import com.ferenc.reservation.repository.model.Car;
 
@@ -20,11 +16,11 @@ class BookingMapperTest extends AbstractTest {
     private BookingMapper bookingMapper = Mappers.getMapper(BookingMapper.class);
 
     @Test
-    void fromModel(){
+    void fromModel() {
         Booking source = PODAM_FACTORY.manufacturePojo(Booking.class);
         BookingDto target = bookingMapper.fromModel(source);
 
-        assertBookingDetails(source,target);
+        assertBookingDetails(source, target);
     }
 
     private void assertBookingDetails(Booking source, BookingDto target) {

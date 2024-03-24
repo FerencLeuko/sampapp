@@ -2,7 +2,6 @@ package com.ferenc.reservation.IT;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -16,11 +15,12 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 
+import com.ferenc.reservation.AbstractTest;
 import com.ferenc.reservation.amqp.service.BookingEventPublishingService;
 import com.ferenc.reservation.businessservice.BookingBusinessService;
 import com.ferenc.reservation.repository.BookingRepository;
@@ -38,13 +38,8 @@ import com.ferenc.reservation.repository.model.CarTypeEnum;
 @ActiveProfiles("test")
 @Tag("IntegrationTest")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class LockServiceIT {
+class LockServiceIT extends AbstractTest {
 
-    private final String userId1 = "user1";
-    private final String userId2 = "user2";
-    private final String licencePlate = "ABC123";
-    private final LocalDate startDate = LocalDate.now();
-    private final LocalDate endDate = startDate.plusDays(1);
     @Autowired
     private BookingBusinessService bookingService;
     @Autowired
@@ -59,19 +54,17 @@ class LockServiceIT {
     private LockService lockService;
     @Autowired
     private PessimisticLockRepository pessimisticLockRepository;
-    @Mock
+    @MockBean
     private BookingEventPublishingService bookingEventPublishingService;
 
     @BeforeEach
     void init() {
-        BookingSequence initialBookingSequence = new BookingSequence(0, bookingSequenceHelper.getBookingSequenceKey());
+        BookingSequence initialBookingSequence = new BookingSequence(BOOKING_ID - 1, bookingSequenceHelper.getBookingSequenceKey());
         bookingSequenceRepository.save(initialBookingSequence);
-        Car car1 = new Car("ABC123", "Opel", "Astra", CarTypeEnum.SEDAN, 5);
+        Car car1 = new Car(LICENCE_PLATE, "Opel", "Astra", CarTypeEnum.SEDAN, 5);
         carRepository.save(car1);
-        Car car2 = new Car("ABC124", "Opel", "Astra", CarTypeEnum.SEDAN, 5);
+        Car car2 = new Car(LICENCE_PLATE_OTHER, "Opel", "Astra", CarTypeEnum.SEDAN, 5);
         carRepository.save(car2);
-        Car car3 = new Car("ABC125", "Opel", "Astra", CarTypeEnum.STATION_WAGON, 5);
-        carRepository.save(car3);
     }
 
     @AfterEach
@@ -87,17 +80,18 @@ class LockServiceIT {
     void testConcurrentBooking() throws InterruptedException, ExecutionException {
         ExecutorService executorService = Executors.newFixedThreadPool(2);
         try {
-            executorService.submit(() -> bookingService.createBooking(userId1, licencePlate, startDate, endDate));
-            executorService.submit(() -> bookingService.createBooking(userId2, licencePlate, startDate.plusDays(3), endDate.plusDays(3)));
+            executorService.submit(() -> bookingService.createBooking(USER_ID, LICENCE_PLATE, START_DATE, END_DATE));
+            executorService.submit(() -> bookingService.createBooking(USER_ID_OTHER, LICENCE_PLATE, END_DATE.plusDays(3), END_DATE.plusDays(3)));
         } finally {
             executorService.shutdown();
         }
         executorService.awaitTermination(10, TimeUnit.SECONDS);
-        List<Booking> bookings = bookingRepository.findByCarLicencePlate(licencePlate);
+        List<Booking> bookings = bookingRepository.findByCarLicencePlate(LICENCE_PLATE);
 
-        assertThat(bookings).hasSize(2);
-        assertThat(bookings).anySatisfy(booking -> assertThat(booking.getUserId()).isEqualTo(userId1));
-        assertThat(bookings).anySatisfy(booking -> assertThat(booking.getUserId()).isEqualTo(userId2));
+        assertThat(bookings)
+                .hasSize(2)
+                .anySatisfy(booking -> assertThat(booking.getUserId()).isEqualTo(USER_ID))
+                .anySatisfy(booking -> assertThat(booking.getUserId()).isEqualTo(USER_ID_OTHER));
     }
 
     @Test
@@ -105,14 +99,14 @@ class LockServiceIT {
     void testConcurrentBookingSameDates() throws InterruptedException, ExecutionException {
         ExecutorService executorService = Executors.newFixedThreadPool(2);
         try {
-            executorService.submit(() -> bookingService.createBooking(userId1, licencePlate, startDate, endDate));
-            executorService.submit(() -> bookingService.createBooking(userId2, licencePlate, startDate, endDate));
+            executorService.submit(() -> bookingService.createBooking(USER_ID, LICENCE_PLATE, START_DATE, END_DATE));
+            executorService.submit(() -> bookingService.createBooking(USER_ID_OTHER, LICENCE_PLATE, START_DATE, END_DATE));
         } catch (Exception e) {
         } finally {
             executorService.shutdown();
         }
         executorService.awaitTermination(10, TimeUnit.SECONDS);
-        assertThat(bookingRepository.findByCarLicencePlate(licencePlate)).hasSize(1);
+        assertThat(bookingRepository.findByCarLicencePlate(LICENCE_PLATE)).hasSize(1);
     }
 
     @Test
@@ -120,8 +114,8 @@ class LockServiceIT {
     void testConcurrentLocking() throws InterruptedException, ExecutionException {
         ExecutorService executorService = Executors.newFixedThreadPool(2);
         try {
-            executorService.submit(() -> lockService.acquireLock(licencePlate, userId1));
-            executorService.submit(() -> lockService.acquireLock(licencePlate, userId2));
+            executorService.submit(() -> lockService.acquireLock(LICENCE_PLATE, USER_ID));
+            executorService.submit(() -> lockService.acquireLock(LICENCE_PLATE, USER_ID_OTHER));
         } finally {
             executorService.shutdown();
         }
@@ -134,8 +128,8 @@ class LockServiceIT {
     void testConcurrentLockingDifferentCars() throws InterruptedException, ExecutionException {
         ExecutorService executorService = Executors.newFixedThreadPool(2);
         try {
-            executorService.submit(() -> lockService.acquireLock(licencePlate, userId1));
-            executorService.submit(() -> lockService.acquireLock(licencePlate + "diff", userId2));
+            executorService.submit(() -> lockService.acquireLock(LICENCE_PLATE, USER_ID));
+            executorService.submit(() -> lockService.acquireLock(LICENCE_PLATE_OTHER, USER_ID_OTHER));
         } finally {
             executorService.shutdown();
         }

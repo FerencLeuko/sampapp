@@ -4,7 +4,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -23,6 +22,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ferenc.reservation.AbstractTest;
 import com.ferenc.reservation.businessservice.CarBusinessService;
 import com.ferenc.reservation.controller.dto.CarDto;
 import com.ferenc.reservation.mapper.CarMapper;
@@ -34,7 +34,7 @@ import com.ferenc.reservation.repository.model.CarTypeEnum;
 @WebMvcTest(controllers = CarController.class)
 @ActiveProfiles(value = "test")
 @AutoConfigureMockMvc(addFilters = false)
-class CarControllerTest {
+class CarControllerTest extends AbstractTest {
 
     private CarTypeMapper carTypeMapper = CarController.getCarTypeMapper();
 
@@ -50,8 +50,8 @@ class CarControllerTest {
     private CarBusinessService carBusinessService;
 
     private static MultiValueMap<String, String> getMultiValueMapForDateParams() {
-        String startDate = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE);
-        String endDate = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE);
+        String startDate = START_DATE.format(DateTimeFormatter.ISO_LOCAL_DATE);
+        String endDate = END_DATE.format(DateTimeFormatter.ISO_LOCAL_DATE);
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.put("startDate", List.of(startDate));
         params.put("endDate", List.of(endDate));
@@ -59,12 +59,12 @@ class CarControllerTest {
     }
 
     private static CarDto getCarDto() {
-        CarDto carDto = new CarDto("ABC123", "Opel", "Astra", com.ferenc.reservation.controller.dto.CarTypeEnum.SEDAN, 5);
+        CarDto carDto = new CarDto(LICENCE_PLATE, "Opel", "Astra", com.ferenc.reservation.controller.dto.CarTypeEnum.SEDAN, 5);
         return carDto;
     }
 
     private static Car getCar() {
-        Car car = new Car("ABC123", "Opel", "Astra", CarTypeEnum.SEDAN, 5);
+        Car car = new Car(LICENCE_PLATE, "Opel", "Astra", CarTypeEnum.SEDAN, 5);
         return car;
     }
 
@@ -76,10 +76,10 @@ class CarControllerTest {
     @Test
     void testGetAvailableCars_For200() throws Exception {
         MultiValueMap<String, String> params = getMultiValueMapForDateParams();
-        Mockito.when(carBusinessService.getAvailableCars(LocalDate.now(), LocalDate.now())).thenReturn(List.of(getCar()));
+        Mockito.when(carBusinessService.getAvailableCars(START_DATE, END_DATE)).thenReturn(List.of(getCar()));
         mockMvc.perform(get("/cars/available").params(params))
                 .andExpect(status().isOk());
-        Mockito.verify(carBusinessService).getAvailableCars(LocalDate.now(), LocalDate.now());
+        Mockito.verify(carBusinessService).getAvailableCars(START_DATE, END_DATE);
     }
 
     @Test
@@ -91,9 +91,17 @@ class CarControllerTest {
     }
 
     @Test
+    void testGetCar_For200() throws Exception {
+        Mockito.when(carBusinessService.getCar(LICENCE_PLATE)).thenReturn(getCar());
+        mockMvc.perform(get("/cars/{licencePlate}", LICENCE_PLATE))
+                .andExpect(status().isOk());
+        Mockito.verify(carBusinessService).getCar(LICENCE_PLATE);
+    }
+
+    @Test
     void testGetCars_For200() throws Exception {
         Mockito.when(carBusinessService.getAllCars()).thenReturn(List.of(getCar()));
-        mockMvc.perform(get("/cars").param("licencePlate", "ABC111"))
+        mockMvc.perform(get("/cars"))
                 .andExpect(status().isOk());
         Mockito.verify(carBusinessService).getAllCars();
     }

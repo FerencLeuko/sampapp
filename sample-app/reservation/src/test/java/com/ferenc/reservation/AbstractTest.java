@@ -12,16 +12,18 @@ import uk.co.jemos.podam.api.PodamFactoryImpl;
 public class AbstractTest {
 
     protected static final PodamFactory PODAM_FACTORY = new PodamFactoryImpl();
-    protected static final int TEST_BOOKING_ID = 1;
-    protected static final String TEST_USER_ID = "abc@google.com";
-    protected static final String OTHER_USER_ID = "foo" + TEST_USER_ID;
-    protected static final String TEST_LICENCE_PLATE = "ABC123";
+    protected static final int BOOKING_ID = 1;
+    protected static final int BOOKING_ID_OTHER = 2;
+    protected static final String USER_ID = "abc@google.com";
+    protected static final String USER_ID_OTHER = "foo" + USER_ID;
+    protected static final String LICENCE_PLATE = "ABC123";
+    protected static final String LICENCE_PLATE_OTHER = "ABC124";
     protected static final LocalDate START_DATE = LocalDate.now();
     protected static final LocalDate END_DATE = LocalDate.now().plusDays(1);
 
     protected static BookingRequest getValidBookingRequest() {
         BookingRequest bookingRequest = new BookingRequest();
-        bookingRequest.setLicencePlate(TEST_LICENCE_PLATE);
+        bookingRequest.setLicencePlate(LICENCE_PLATE);
         LocalDate startDate = START_DATE;
         LocalDate endDate = END_DATE;
         DateRange dateRange = new DateRange(startDate, endDate);

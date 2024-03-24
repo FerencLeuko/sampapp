@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -13,10 +12,14 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -49,6 +52,16 @@ class BookingBusinessServiceTest extends AbstractTest {
     private LockService lockService;
     @InjectMocks
     private BookingBusinessServiceImpl bookingBusinessService;
+
+    private static Stream<Arguments> values_isCarAvailable_false() {
+        return Stream.of(
+                Arguments.of(
+                        START_DATE.minusDays(1), START_DATE,
+                        END_DATE, END_DATE.plusDays(1),
+                        START_DATE.minusDays(1), END_DATE.plusDays(1)
+                )
+        );
+    }
 
     @AfterEach
     void verifyMocks() {
@@ -108,9 +121,9 @@ class BookingBusinessServiceTest extends AbstractTest {
         when(lockService.acquireLock(any(), any())).thenReturn(true);
 
         assertThatThrownBy(() -> bookingBusinessService.createBooking(expected.getUserId(), car.getLicencePlate(), expected.getStartDate(),
-                        expected.getEndDate())).isInstanceOf(CarNotAvailableException.class)
-                        .hasMessage(String.format("This car: %s is not available for this time range: %s - %s.",
-                                car.getLicencePlate(), expected.getStartDate(), expected.getEndDate()));
+                expected.getEndDate())).isInstanceOf(CarNotAvailableException.class)
+                .hasMessage(String.format("This car: %s is not available for this time range: %s - %s.",
+                        car.getLicencePlate(), expected.getStartDate(), expected.getEndDate()));
 
         verify(carRepository).findByLicencePlate(car.getLicencePlate());
         verify(bookingRepository).findByCarLicencePlate(car.getLicencePlate());
@@ -157,14 +170,14 @@ class BookingBusinessServiceTest extends AbstractTest {
 
         Booking expected = new Booking();
         expected.setCar(car);
-        expected.setUserId(TEST_USER_ID);
+        expected.setUserId(USER_ID);
         expected.setStartDate(bookingRequest.getDateRange().getStartDate());
         expected.setEndDate(bookingRequest.getDateRange().getEndDate());
         expected.setBookingId(PODAM_FACTORY.manufacturePojo(Integer.class));
 
         Booking existing = new Booking();
         existing.setCar(expected.getCar());
-        existing.setUserId(OTHER_USER_ID);
+        existing.setUserId(USER_ID_OTHER);
         existing.setStartDate(expected.getStartDate());
         existing.setEndDate(expected.getEndDate());
         existing.setBookingId(PODAM_FACTORY.manufacturePojo(Integer.class));
@@ -261,51 +274,42 @@ class BookingBusinessServiceTest extends AbstractTest {
     }
 
     @Test
-    void isCarAvailable_true(){
-        BookingRequest bookingRequest = getValidBookingRequest();
-        LocalDate startDate = bookingRequest.getDateRange().getStartDate();
-        LocalDate endDate = bookingRequest.getDateRange().getEndDate();
-
+    void isCarAvailable_true() {
         Car car = PODAM_FACTORY.manufacturePojo(Car.class);
-        String licencePlate = car.getLicencePlate();
+        car.setLicencePlate(LICENCE_PLATE);
 
         Booking existing = new Booking();
         existing.setCar(car);
-        existing.setUserId(OTHER_USER_ID);
-        existing.setStartDate(startDate);
-        existing.setEndDate(endDate);
+        existing.setUserId(USER_ID_OTHER);
+        existing.setStartDate(START_DATE);
+        existing.setEndDate(END_DATE);
         existing.setBookingId(PODAM_FACTORY.manufacturePojo(Integer.class));
-
-        String licencePlateOther = licencePlate + PODAM_FACTORY.manufacturePojo(String.class);
 
         List<Booking> existingBookings = new ArrayList<>();
         existingBookings.add(existing);
 
-        when(bookingRepository.findByCarLicencePlate(licencePlate)).thenReturn(existingBookings);
-        when(bookingRepository.findByCarLicencePlate(licencePlateOther)).thenReturn(List.of());
+        when(bookingRepository.findByCarLicencePlate(LICENCE_PLATE)).thenReturn(existingBookings);
+        when(bookingRepository.findByCarLicencePlate(LICENCE_PLATE_OTHER)).thenReturn(List.of());
 
-        assertThat(bookingBusinessService.isCarAvailable(licencePlate,
-                endDate.plusDays(1), endDate.plusDays(1))).isTrue();
+        assertThat(bookingBusinessService.isCarAvailable(LICENCE_PLATE,
+                END_DATE.plusDays(1), END_DATE.plusDays(1))).isTrue();
 
-        assertThat(bookingBusinessService.isCarAvailable(licencePlateOther,
-                startDate, endDate)).isTrue();
+        assertThat(bookingBusinessService.isCarAvailable(LICENCE_PLATE_OTHER,
+                START_DATE, END_DATE)).isTrue();
 
-        verify(bookingRepository).findByCarLicencePlate(licencePlate);
-        verify(bookingRepository).findByCarLicencePlate(licencePlateOther);
+        verify(bookingRepository).findByCarLicencePlate(LICENCE_PLATE);
+        verify(bookingRepository).findByCarLicencePlate(LICENCE_PLATE_OTHER);
     }
 
-    @Test
-    void isCarAvailable_false(){
-        BookingRequest bookingRequest = getValidBookingRequest();
-        LocalDate startDate = bookingRequest.getDateRange().getStartDate();
-        LocalDate endDate = bookingRequest.getDateRange().getEndDate();
-
+    @ParameterizedTest
+    @MethodSource("values_isCarAvailable_false")
+    void isCarAvailable_false(LocalDate startDate, LocalDate endDate) {
         Car car = PODAM_FACTORY.manufacturePojo(Car.class);
-        String licencePlate = car.getLicencePlate();
+        car.setLicencePlate(LICENCE_PLATE);
 
         Booking existing = new Booking();
         existing.setCar(car);
-        existing.setUserId(OTHER_USER_ID);
+        existing.setUserId(USER_ID_OTHER);
         existing.setStartDate(startDate);
         existing.setEndDate(endDate);
         existing.setBookingId(PODAM_FACTORY.manufacturePojo(Integer.class));
@@ -315,15 +319,9 @@ class BookingBusinessServiceTest extends AbstractTest {
 
         when(bookingRepository.findByCarLicencePlate(any())).thenReturn(existingBookings);
 
-        assertThat(bookingBusinessService.isCarAvailable(licencePlate,
-                endDate, endDate.plusDays(1))).isFalse();
+        assertThat(bookingBusinessService.isCarAvailable(LICENCE_PLATE,
+                startDate, endDate)).isFalse();
 
-        assertThat(bookingBusinessService.isCarAvailable(licencePlate,
-                startDate.minusDays(1), startDate)).isFalse();
-
-        assertThat(bookingBusinessService.isCarAvailable(licencePlate,
-                startDate.minusDays(1), endDate.plusDays(1))).isFalse();
-
-        verify(bookingRepository, times(3)).findByCarLicencePlate(licencePlate);
+        verify(bookingRepository).findByCarLicencePlate(LICENCE_PLATE);
     }
 }

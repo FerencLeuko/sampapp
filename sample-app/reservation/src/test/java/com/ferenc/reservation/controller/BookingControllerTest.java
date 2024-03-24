@@ -37,9 +37,6 @@ import com.ferenc.reservation.repository.model.Booking;
 @AutoConfigureMockMvc(addFilters = false)
 class BookingControllerTest extends AbstractTest {
 
-    private static final String TEST_USER_ID = "abc@google.com";
-    private static final int TEST_BOOKING_ID = 0;
-
     @Autowired
     private MockMvc mockMvc;
 
@@ -58,7 +55,7 @@ class BookingControllerTest extends AbstractTest {
     private static Booking getMockBooking(Integer bookingId) {
         Booking booking = new Booking();
         booking.setBookingId(bookingId);
-        booking.setUserId(TEST_USER_ID);
+        booking.setUserId(USER_ID);
         return booking;
     }
 
@@ -70,22 +67,22 @@ class BookingControllerTest extends AbstractTest {
     @Test
     void testPostBooking_WithPresentDates_For201() throws Exception {
         try (MockedStatic<SecurityUtils> utilities = Mockito.mockStatic(SecurityUtils.class)) {
-            utilities.when(SecurityUtils::getUserEmailFromToken).thenReturn(TEST_USER_ID);
+            utilities.when(SecurityUtils::getUserEmailFromToken).thenReturn(USER_ID);
             BookingRequest bookingRequest = getValidBookingRequest();
             Mockito.when(bookingBusinessService
                             .createBooking(
-                                    TEST_USER_ID,
+                                    USER_ID,
                                     bookingRequest.getLicencePlate(),
                                     bookingRequest.getDateRange().getStartDate(),
                                     bookingRequest.getDateRange().getEndDate()
                             ))
-                    .thenReturn(getMockBooking(TEST_BOOKING_ID));
+                    .thenReturn(getMockBooking(BOOKING_ID));
             mockMvc.perform(post("/bookings")
                             .contentType("application/json").content(objectMapper.writeValueAsString(bookingRequest)))
                     .andExpect(status().isCreated());
             Mockito.verify(bookingBusinessService)
                     .createBooking(
-                            TEST_USER_ID,
+                            USER_ID,
                             bookingRequest.getLicencePlate(),
                             bookingRequest.getDateRange().getStartDate(),
                             bookingRequest.getDateRange().getEndDate()
@@ -96,24 +93,24 @@ class BookingControllerTest extends AbstractTest {
     @Test
     void testPostBooking_WithFutureDates_For201() throws Exception {
         try (MockedStatic<SecurityUtils> utilities = Mockito.mockStatic(SecurityUtils.class)) {
-            utilities.when(SecurityUtils::getUserEmailFromToken).thenReturn(TEST_USER_ID);
+            utilities.when(SecurityUtils::getUserEmailFromToken).thenReturn(USER_ID);
             BookingRequest bookingRequest = getValidBookingRequest();
             bookingRequest.getDateRange().setStartDate(LocalDate.now().plusDays(5));
             bookingRequest.getDateRange().setEndDate(LocalDate.now().plusDays(6));
             Mockito.when(bookingBusinessService
                             .createBooking(
-                                    TEST_USER_ID,
+                                    USER_ID,
                                     bookingRequest.getLicencePlate(),
                                     bookingRequest.getDateRange().getStartDate(),
                                     bookingRequest.getDateRange().getEndDate()
                             ))
-                    .thenReturn(getMockBooking(TEST_BOOKING_ID));
+                    .thenReturn(getMockBooking(BOOKING_ID));
             mockMvc.perform(post("/bookings")
                             .contentType("application/json").content(objectMapper.writeValueAsString(bookingRequest)))
                     .andExpect(status().isCreated());
             Mockito.verify(bookingBusinessService)
                     .createBooking(
-                            TEST_USER_ID,
+                            USER_ID,
                             bookingRequest.getLicencePlate(),
                             bookingRequest.getDateRange().getStartDate(),
                             bookingRequest.getDateRange().getEndDate()
@@ -124,7 +121,7 @@ class BookingControllerTest extends AbstractTest {
     @Test
     void testPostBooking_WithPastDate_For400() throws Exception {
         try (MockedStatic<SecurityUtils> utilities = Mockito.mockStatic(SecurityUtils.class)) {
-            utilities.when(SecurityUtils::getUserEmailFromToken).thenReturn(TEST_USER_ID);
+            utilities.when(SecurityUtils::getUserEmailFromToken).thenReturn(USER_ID);
             BookingRequest bookingRequest = getValidBookingRequest();
             LocalDate pastDate = LocalDate.now().minusDays(1);
             bookingRequest.getDateRange().setStartDate(pastDate);
@@ -137,7 +134,7 @@ class BookingControllerTest extends AbstractTest {
     @Test
     void testPostBooking_WithEarlierEndDate_For400() throws Exception {
         try (MockedStatic<SecurityUtils> utilities = Mockito.mockStatic(SecurityUtils.class)) {
-            utilities.when(SecurityUtils::getUserEmailFromToken).thenReturn(TEST_USER_ID);
+            utilities.when(SecurityUtils::getUserEmailFromToken).thenReturn(USER_ID);
             BookingRequest bookingRequest = getValidBookingRequest();
             bookingRequest.getDateRange().setStartDate(LocalDate.now().plusDays(5));
             bookingRequest.getDateRange().setEndDate(LocalDate.now().plusDays(4));
@@ -150,7 +147,7 @@ class BookingControllerTest extends AbstractTest {
     @Test
     void testPostBooking_WithEmptyBody_For400() throws Exception {
         try (MockedStatic<SecurityUtils> utilities = Mockito.mockStatic(SecurityUtils.class)) {
-            utilities.when(SecurityUtils::getUserEmailFromToken).thenReturn(TEST_USER_ID);
+            utilities.when(SecurityUtils::getUserEmailFromToken).thenReturn(USER_ID);
             mockMvc.perform(post("/bookings")
                             .contentType("application/json").content(objectMapper.writeValueAsString("")))
                     .andExpect(status().isBadRequest());
@@ -160,35 +157,35 @@ class BookingControllerTest extends AbstractTest {
     @Test
     void testGetBooking_For200() throws Exception {
         try (MockedStatic<SecurityUtils> utilities = Mockito.mockStatic(SecurityUtils.class)) {
-            utilities.when(SecurityUtils::getUserEmailFromToken).thenReturn(TEST_USER_ID);
-            Mockito.when(bookingBusinessService.getBooking(TEST_BOOKING_ID)).thenReturn(getMockBooking(TEST_BOOKING_ID));
-            mockMvc.perform(get("/bookings/{bookingId}", "0"))
+            utilities.when(SecurityUtils::getUserEmailFromToken).thenReturn(USER_ID);
+            Mockito.when(bookingBusinessService.getBooking(BOOKING_ID)).thenReturn(getMockBooking(BOOKING_ID));
+            mockMvc.perform(get("/bookings/{bookingId}", BOOKING_ID))
                     .andExpect(status().isOk());
-            Mockito.verify(bookingBusinessService).getBooking(TEST_BOOKING_ID);
+            Mockito.verify(bookingBusinessService).getBooking(BOOKING_ID);
         }
     }
 
     @Test
     void testUpdateBooking_For200() throws Exception {
         try (MockedStatic<SecurityUtils> utilities = Mockito.mockStatic(SecurityUtils.class)) {
-            utilities.when(SecurityUtils::getUserEmailFromToken).thenReturn(TEST_USER_ID);
-            Mockito.when(bookingBusinessService.getBooking(TEST_BOOKING_ID)).thenReturn(getMockBooking(TEST_BOOKING_ID));
+            utilities.when(SecurityUtils::getUserEmailFromToken).thenReturn(USER_ID);
+            Mockito.when(bookingBusinessService.getBooking(BOOKING_ID)).thenReturn(getMockBooking(BOOKING_ID));
             UpdateRequest updateRequest = getValidUpdateRequest();
-            mockMvc.perform(put("/bookings/{bookingId}", "0")
+            mockMvc.perform(put("/bookings/{bookingId}", BOOKING_ID)
                             .contentType("application/json").content(objectMapper.writeValueAsString(updateRequest)))
                     .andExpect(status().isOk());
             Mockito.verify(bookingBusinessService)
-                    .updateBooking(TEST_BOOKING_ID, updateRequest.getDateRange().getStartDate(), updateRequest.getDateRange().getEndDate());
+                    .updateBooking(BOOKING_ID, updateRequest.getDateRange().getStartDate(), updateRequest.getDateRange().getEndDate());
         }
     }
 
     @Test
     void testUpdateBooking_WithInvalidDates_For400() throws Exception {
         try (MockedStatic<SecurityUtils> utilities = Mockito.mockStatic(SecurityUtils.class)) {
-            utilities.when(SecurityUtils::getUserEmailFromToken).thenReturn(TEST_USER_ID);
+            utilities.when(SecurityUtils::getUserEmailFromToken).thenReturn(USER_ID);
             UpdateRequest updateRequest = getValidUpdateRequest();
             updateRequest.getDateRange().setStartDate(LocalDate.now().minusDays(1));
-            mockMvc.perform(put("/bookings/{bookingId}", "0")
+            mockMvc.perform(put("/bookings/{bookingId}", BOOKING_ID)
                             .contentType("application/json").content(objectMapper.writeValueAsString(updateRequest)))
                     .andExpect(status().isBadRequest());
         }
@@ -197,11 +194,11 @@ class BookingControllerTest extends AbstractTest {
     @Test
     void testDeleteBooking_For200() throws Exception {
         try (MockedStatic<SecurityUtils> utilities = Mockito.mockStatic(SecurityUtils.class)) {
-            utilities.when(SecurityUtils::getUserEmailFromToken).thenReturn(TEST_USER_ID);
-            Mockito.when(bookingBusinessService.getBooking(TEST_BOOKING_ID)).thenReturn(getMockBooking(TEST_BOOKING_ID));
-            mockMvc.perform(delete("/bookings/{bookingId}", "0"))
+            utilities.when(SecurityUtils::getUserEmailFromToken).thenReturn(USER_ID);
+            Mockito.when(bookingBusinessService.getBooking(BOOKING_ID)).thenReturn(getMockBooking(BOOKING_ID));
+            mockMvc.perform(delete("/bookings/{bookingId}", BOOKING_ID))
                     .andExpect(status().isOk());
-            Mockito.verify(bookingBusinessService).deleteBooking(TEST_BOOKING_ID);
+            Mockito.verify(bookingBusinessService).deleteBooking(BOOKING_ID);
         }
     }
 

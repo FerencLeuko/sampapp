@@ -8,7 +8,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -44,13 +43,10 @@ class CarBusinessServiceTest extends AbstractTest {
 
     @Test
     void testGetAvailableCars() {
-        LocalDate startDate = LocalDate.now();
-        LocalDate endDate = LocalDate.now().plusDays(1);
-
         List<Car> expected = PODAM_FACTORY.manufacturePojo(ArrayList.class, Car.class);
         when(carRepository.findAll()).thenReturn(expected);
         when(bookingBusinessService.isCarAvailable(any(), any(), any())).thenReturn(true);
-        List<Car> actual = carBusinessService.getAvailableCars(startDate, endDate);
+        List<Car> actual = carBusinessService.getAvailableCars(START_DATE, END_DATE);
 
         assertThat(expected).isEqualTo(actual);
 
