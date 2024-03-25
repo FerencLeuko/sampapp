@@ -1,5 +1,12 @@
 package com.ferenc.reservation.IT;
 
+import static com.ferenc.reservation.TestConstants.END_DATE;
+import static com.ferenc.reservation.TestConstants.INITIAL_SEQUENCE;
+import static com.ferenc.reservation.TestConstants.LICENCE_PLATE;
+import static com.ferenc.reservation.TestConstants.LICENCE_PLATE_OTHER;
+import static com.ferenc.reservation.TestConstants.START_DATE;
+import static com.ferenc.reservation.TestConstants.USER_ID;
+import static com.ferenc.reservation.TestConstants.USER_ID_OTHER;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
@@ -31,8 +38,6 @@ import com.ferenc.reservation.repository.PessimisticLockRepository;
 import com.ferenc.reservation.repository.lock.LockService;
 import com.ferenc.reservation.repository.model.Booking;
 import com.ferenc.reservation.repository.model.BookingSequence;
-import com.ferenc.reservation.repository.model.Car;
-import com.ferenc.reservation.repository.model.CarTypeEnum;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -59,12 +64,8 @@ class LockServiceIT extends AbstractTest {
 
     @BeforeEach
     void init() {
-        BookingSequence initialBookingSequence = new BookingSequence(BOOKING_ID - 1, bookingSequenceHelper.getBookingSequenceKey());
-        bookingSequenceRepository.save(initialBookingSequence);
-        Car car1 = new Car(LICENCE_PLATE, "Opel", "Astra", CarTypeEnum.SEDAN, 5);
-        carRepository.save(car1);
-        Car car2 = new Car(LICENCE_PLATE_OTHER, "Opel", "Astra", CarTypeEnum.SEDAN, 5);
-        carRepository.save(car2);
+        bookingSequenceRepository.save(new BookingSequence(INITIAL_SEQUENCE, bookingSequenceHelper.getBookingSequenceKey()));
+        carRepository.saveAll(getCars());
     }
 
     @AfterEach

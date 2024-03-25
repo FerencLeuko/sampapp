@@ -1,5 +1,11 @@
 package com.ferenc.reservation.businessservice;
 
+import static com.ferenc.reservation.TestConstants.END_DATE;
+import static com.ferenc.reservation.TestConstants.LICENCE_PLATE;
+import static com.ferenc.reservation.TestConstants.LICENCE_PLATE_OTHER;
+import static com.ferenc.reservation.TestConstants.START_DATE;
+import static com.ferenc.reservation.TestConstants.USER_ID;
+import static com.ferenc.reservation.TestConstants.USER_ID_OTHER;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;

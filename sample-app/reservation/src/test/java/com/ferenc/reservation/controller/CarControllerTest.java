@@ -1,5 +1,8 @@
 package com.ferenc.reservation.controller;
 
+import static com.ferenc.reservation.TestConstants.END_DATE;
+import static com.ferenc.reservation.TestConstants.LICENCE_PLATE;
+import static com.ferenc.reservation.TestConstants.START_DATE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;

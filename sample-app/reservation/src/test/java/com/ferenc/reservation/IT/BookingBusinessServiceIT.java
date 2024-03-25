@@ -1,5 +1,13 @@
 package com.ferenc.reservation.IT;
 
+import static com.ferenc.reservation.TestConstants.BOOKING_ID;
+import static com.ferenc.reservation.TestConstants.BOOKING_ID_OTHER;
+import static com.ferenc.reservation.TestConstants.END_DATE;
+import static com.ferenc.reservation.TestConstants.INITIAL_SEQUENCE;
+import static com.ferenc.reservation.TestConstants.LICENCE_PLATE_OTHER;
+import static com.ferenc.reservation.TestConstants.START_DATE;
+import static com.ferenc.reservation.TestConstants.USER_ID;
+import static com.ferenc.reservation.TestConstants.USER_ID_OTHER;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -7,9 +15,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,7 +47,6 @@ import com.ferenc.reservation.repository.lock.LockService;
 import com.ferenc.reservation.repository.model.Booking;
 import com.ferenc.reservation.repository.model.BookingSequence;
 import com.ferenc.reservation.repository.model.Car;
-import com.ferenc.reservation.repository.model.CarTypeEnum;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -67,15 +74,12 @@ class BookingBusinessServiceIT extends AbstractTest {
 
     @BeforeEach
     void init() {
-        BookingSequence initialBookingSequence = new BookingSequence(BOOKING_ID - 1, bookingSequenceHelper.getBookingSequenceKey());
-        bookingSequenceRepository.save(initialBookingSequence);
-        Car car1 = new Car(LICENCE_PLATE, "Opel", "Astra", CarTypeEnum.SEDAN, 5);
-        carRepository.save(car1);
-        Car car2 = new Car(LICENCE_PLATE_OTHER, "Opel", "Astra", CarTypeEnum.SEDAN, 5);
-        carRepository.save(car2);
-        Booking booking1 = new Booking(bookingSequenceHelper.getNextSequence(), USER_ID, LocalDate.now().plusDays(10),
-                LocalDate.now().plusDays(10), car2);
-        bookingRepository.save(booking1);
+        bookingSequenceRepository.save(new BookingSequence(INITIAL_SEQUENCE, bookingSequenceHelper.getBookingSequenceKey()));
+        Set<Car> cars = getCars();
+        carRepository.saveAll(cars);
+        Car car = cars.stream().filter(c -> c.getLicencePlate().equals(LICENCE_PLATE_OTHER)).findFirst().get();
+        Booking booking = new Booking(bookingSequenceHelper.getNextSequence(), USER_ID, START_DATE, END_DATE, car);
+        bookingRepository.save(booking);
     }
 
     @AfterEach

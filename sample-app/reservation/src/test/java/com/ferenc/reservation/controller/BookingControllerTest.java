@@ -1,5 +1,7 @@
 package com.ferenc.reservation.controller;
 
+import static com.ferenc.reservation.TestConstants.BOOKING_ID;
+import static com.ferenc.reservation.TestConstants.USER_ID;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;

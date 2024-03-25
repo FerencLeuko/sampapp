@@ -1,5 +1,7 @@
 package com.ferenc.reservation.businessservice;
 
+import static com.ferenc.reservation.TestConstants.END_DATE;
+import static com.ferenc.reservation.TestConstants.START_DATE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;

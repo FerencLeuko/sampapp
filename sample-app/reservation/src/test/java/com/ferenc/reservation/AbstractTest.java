@@ -1,10 +1,18 @@
 package com.ferenc.reservation;
 
+import static com.ferenc.reservation.TestConstants.END_DATE;
+import static com.ferenc.reservation.TestConstants.LICENCE_PLATE;
+import static com.ferenc.reservation.TestConstants.LICENCE_PLATE_OTHER;
+import static com.ferenc.reservation.TestConstants.START_DATE;
+
 import java.time.LocalDate;
+import java.util.Set;
 
 import com.ferenc.reservation.controller.dto.BookingRequest;
 import com.ferenc.reservation.controller.dto.DateRange;
 import com.ferenc.reservation.controller.dto.UpdateRequest;
+import com.ferenc.reservation.repository.model.Car;
+import com.ferenc.reservation.repository.model.CarTypeEnum;
 
 import uk.co.jemos.podam.api.PodamFactory;
 import uk.co.jemos.podam.api.PodamFactoryImpl;
@@ -12,14 +20,6 @@ import uk.co.jemos.podam.api.PodamFactoryImpl;
 public class AbstractTest {
 
     protected static final PodamFactory PODAM_FACTORY = new PodamFactoryImpl();
-    protected static final int BOOKING_ID = 1;
-    protected static final int BOOKING_ID_OTHER = 2;
-    protected static final String USER_ID = "abc@google.com";
-    protected static final String USER_ID_OTHER = "foo" + USER_ID;
-    protected static final String LICENCE_PLATE = "ABC123";
-    protected static final String LICENCE_PLATE_OTHER = "ABC124";
-    protected static final LocalDate START_DATE = LocalDate.now();
-    protected static final LocalDate END_DATE = LocalDate.now().plusDays(1);
 
     protected static BookingRequest getValidBookingRequest() {
         BookingRequest bookingRequest = new BookingRequest();
@@ -38,4 +38,10 @@ public class AbstractTest {
         return updateRequest;
     }
 
+    protected static Set<Car> getCars() {
+        return Set.of(
+                new Car(LICENCE_PLATE, "Opel", "Astra", CarTypeEnum.SEDAN, 5),
+                new Car(LICENCE_PLATE_OTHER, "Opel", "Astra", CarTypeEnum.SEDAN, 5));
+
+    }
 }
