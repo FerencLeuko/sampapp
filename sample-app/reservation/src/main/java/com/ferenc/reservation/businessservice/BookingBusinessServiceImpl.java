@@ -1,5 +1,17 @@
 package com.ferenc.reservation.businessservice;
 
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataAccessException;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.ferenc.reservation.amqp.service.BookingEventPublishingService;
 import com.ferenc.reservation.exception.CarNotAvailableException;
 import com.ferenc.reservation.exception.NoSuchBookingException;
@@ -9,18 +21,8 @@ import com.ferenc.reservation.repository.CarRepository;
 import com.ferenc.reservation.repository.lock.LockService;
 import com.ferenc.reservation.repository.model.Booking;
 import com.ferenc.reservation.repository.model.Car;
-import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.dao.DataAccessException;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -35,21 +37,22 @@ public class BookingBusinessServiceImpl implements BookingBusinessService {
     private final LockService lockService;
 
     @Override
-    @Transactional
+    @Transactional()
     @Retryable(retryFor = DataAccessException.class, maxAttempts = 4, backoff = @Backoff(delay = 500))
     public Booking createBooking(String userId, String licencePlate, LocalDate startDate, LocalDate endDate) {
         Car car = carRepository.findByLicencePlate(licencePlate)
-                .orElseThrow(() -> new CarNotAvailableException("This car is not available in our system: " + licencePlate +"."));
+                .orElseThrow(() -> new CarNotAvailableException("This car is not available in our system: " + licencePlate + "."));
         Booking booking = new Booking();
         booking.setCar(car);
         booking.setUserId(userId);
         booking.setStartDate(startDate);
         booking.setEndDate(endDate);
 
-        if(lockService.acquireLock(licencePlate, booking.getUserId())) {
+        if (lockService.acquireLock(licencePlate, booking.getUserId())) {
             try {
-                if (!isCarAvailable(licencePlate, startDate, endDate)) {
-                    throw new CarNotAvailableException("This car: " + licencePlate + " is not available for this time range: " + startDate + " - " + endDate + ".");
+                if (!isCarAvailable(licencePlate, startDate, endDate, Optional.empty())) {
+                    throw new CarNotAvailableException(
+                            "This car: " + licencePlate + " is not available for this time range: " + startDate + " - " + endDate + ".");
                 }
                 booking.setBookingId(bookingSequenceHelper.getNextSequence());
                 bookingRepository.save(booking);
@@ -81,16 +84,17 @@ public class BookingBusinessServiceImpl implements BookingBusinessService {
     }
 
     @Override
-    @Transactional
-    @Retryable(retryFor = DataAccessException.class, maxAttempts = 4, backoff = @Backoff(delay = 500))
+    @Transactional()
+    @Retryable(retryFor = DataAccessException.class, maxAttempts = 4, backoff = @Backoff(delay = 300))
     public Booking updateBooking(Integer bookingId, LocalDate startDate, LocalDate endDate) {
         Booking booking = getBooking(bookingId);
         String licencePlate = booking.getCar().getLicencePlate();
 
-        if(lockService.acquireLock(licencePlate, booking.getUserId())) {
+        if (lockService.acquireLock(licencePlate, booking.getUserId())) {
             try {
                 if (!isCarAvailable(licencePlate, startDate, endDate, Optional.of(booking))) {
-                    throw new CarNotAvailableException("This car: " + licencePlate + " is not available for this time range: " + startDate + " - " + endDate + ".");
+                    throw new CarNotAvailableException(
+                            "This car: " + licencePlate + " is not available for this time range: " + startDate + " - " + endDate + ".");
                 }
                 booking.setStartDate(startDate);
                 booking.setEndDate(endDate);
@@ -99,7 +103,7 @@ public class BookingBusinessServiceImpl implements BookingBusinessService {
                 lockService.releaseLock(licencePlate, booking.getUserId());
             }
         }
-        
+
         logger.info("Booking has been updated, bookingId: {}", booking.getBookingId());
         return booking;
     }
@@ -124,22 +128,22 @@ public class BookingBusinessServiceImpl implements BookingBusinessService {
     }
 
     @Override
-    public boolean isCarAvailable(String licencePlate, LocalDate startDate, LocalDate endDate){
+    public boolean isCarAvailable(String licencePlate, LocalDate startDate, LocalDate endDate) {
         return isCarAvailable(licencePlate, startDate, endDate, Optional.empty());
     }
-    
-	private boolean isCarAvailable(String licencePlate, LocalDate startDate, LocalDate endDate, Optional<Booking> skip){
-		List<Booking> bookingsForTheCar = bookingRepository.findByCarLicencePlate(licencePlate);
-		if(skip.isPresent()){
-			bookingsForTheCar.remove(skip);
-		}
-		for(Booking booking: bookingsForTheCar){
-			if(!booking.getStartDate().isBefore(startDate) && !booking.getStartDate().isAfter(endDate)
-					|| !booking.getEndDate().isBefore(startDate) && !booking.getEndDate().isAfter(endDate)
-			){
-				return false;
-			}
-		}
-		return true;
-	}
+
+    private boolean isCarAvailable(String licencePlate, LocalDate startDate, LocalDate endDate, Optional<Booking> skip) {
+        List<Booking> bookingsForTheCar = bookingRepository.findByCarLicencePlate(licencePlate);
+        if (skip.isPresent()) {
+            bookingsForTheCar.remove(skip.get());
+        }
+        for (Booking booking : bookingsForTheCar) {
+            if (!booking.getStartDate().isBefore(startDate) && !booking.getStartDate().isAfter(endDate)
+                    || !booking.getEndDate().isBefore(startDate) && !booking.getEndDate().isAfter(endDate)
+            ) {
+                return false;
+            }
+        }
+        return true;
+    }
 }

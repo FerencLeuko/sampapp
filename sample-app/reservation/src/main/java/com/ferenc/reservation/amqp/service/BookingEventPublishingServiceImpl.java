@@ -1,25 +1,27 @@
 package com.ferenc.reservation.amqp.service;
 
-import com.ferenc.commons.event.BookingEvent;
-import com.ferenc.reservation.amqp.AmqpConfiguration;
-import com.ferenc.reservation.repository.model.Booking;
-import lombok.RequiredArgsConstructor;
+import java.time.LocalDateTime;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
+import com.ferenc.commons.event.BookingEvent;
+import com.ferenc.reservation.amqp.AmqpConfiguration;
+import com.ferenc.reservation.repository.model.Booking;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class BookingEventPublishingServiceImpl implements BookingEventPublishingService
-{
+public class BookingEventPublishingServiceImpl implements BookingEventPublishingService {
+
     private final Logger logger = LoggerFactory.getLogger(BookingEventPublishingService.class);
 
     private final RabbitTemplate rabbitTemplate;
     private final AmqpConfiguration amqpConfiguration;
-    
+
     @Override
     public void publishNewBookingEvent(Booking booking) {
         try {
@@ -39,7 +41,7 @@ public class BookingEventPublishingServiceImpl implements BookingEventPublishing
 
             logger.info("BookingEvent has been published, bookingId: {}", booking.getBookingId());
 
-        } catch (Throwable e){
+        } catch (Throwable e) {
             logger.error("BookingEvent has not been published, bookingId: {}. {}", booking.getBookingId(), e);
         }
     }

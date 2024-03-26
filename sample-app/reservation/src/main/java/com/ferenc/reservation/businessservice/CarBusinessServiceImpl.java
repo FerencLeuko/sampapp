@@ -1,15 +1,18 @@
 package com.ferenc.reservation.businessservice;
 
-import java.time.*;
-import java.util.*;
-import java.util.stream.*;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.stream.Collectors;
 
-import com.ferenc.reservation.exception.*;
-import com.ferenc.reservation.repository.*;
-import com.ferenc.reservation.repository.model.*;
-import lombok.*;
-import org.slf4j.*;
-import org.springframework.stereotype.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
+import com.ferenc.reservation.exception.NoSuchCarException;
+import com.ferenc.reservation.repository.CarRepository;
+import com.ferenc.reservation.repository.model.Car;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -20,16 +23,16 @@ public class CarBusinessServiceImpl implements CarBusinessService {
     private final CarRepository carRepository;
 
     private final BookingBusinessService bookingBusinessService;
-    
+
     @Override
     public List<Car> getAvailableCars(
             LocalDate startDate,
             LocalDate endDate
-    ){
+    ) {
         List<Car> cars = carRepository.findAll();
         cars = cars
                 .stream()
-                .filter(car -> bookingBusinessService.isCarAvailable(car.getLicencePlate(),startDate,endDate))
+                .filter(car -> bookingBusinessService.isCarAvailable(car.getLicencePlate(), startDate, endDate))
                 .collect(Collectors.toList());
         return cars;
     }
@@ -42,7 +45,7 @@ public class CarBusinessServiceImpl implements CarBusinessService {
     @Override
     public Car getCar(String licencePlate) {
         return carRepository.findByLicencePlate(licencePlate)
-                .orElseThrow(() -> new NoSuchCarException("This car does not exists in our system: " + licencePlate +"."));
+                .orElseThrow(() -> new NoSuchCarException("This car does not exist in our system: " + licencePlate + "."));
     }
 
     @Override

@@ -1,5 +1,32 @@
 package com.ferenc.reservation.IT;
 
+import static com.ferenc.reservation.TestConstants.END_DATE;
+import static com.ferenc.reservation.TestConstants.INITIAL_SEQUENCE;
+import static com.ferenc.reservation.TestConstants.LICENCE_PLATE;
+import static com.ferenc.reservation.TestConstants.START_DATE;
+import static com.ferenc.reservation.TestConstants.USER_ID;
+import static com.ferenc.reservation.TestConstants.USER_ID_OTHER;
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.ActiveProfiles;
+
+import com.ferenc.reservation.AbstractTest;
 import com.ferenc.reservation.amqp.service.BookingEventPublishingService;
 import com.ferenc.reservation.businessservice.BookingBusinessService;
 import com.ferenc.reservation.repository.BookingRepository;
@@ -9,32 +36,12 @@ import com.ferenc.reservation.repository.CarRepository;
 import com.ferenc.reservation.repository.lock.LockService;
 import com.ferenc.reservation.repository.model.Booking;
 import com.ferenc.reservation.repository.model.BookingSequence;
-import com.ferenc.reservation.repository.model.Car;
-import com.ferenc.reservation.repository.model.CarTypeEnum;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
-
-import java.time.LocalDate;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
-@ContextConfiguration
 @ActiveProfiles("test")
 @Tag("IntegrationTest")
-class LockServiceIT {
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+class LockServiceIT extends AbstractTest {
 
     @Autowired
     private BookingBusinessService bookingService;
@@ -48,65 +55,53 @@ class LockServiceIT {
     private BookingSequenceRepository bookingSequenceRepository;
     @Autowired
     private LockService lockService;
-
-    @Mock
+    @MockBean
     private BookingEventPublishingService bookingEventPublishingService;
-
-    private final String userId1 = "user1";
-    private final String userId2 = "user2";
-    private final String licencePlate = "ABC123";
-    private final LocalDate startDate = LocalDate.now();
-    private final LocalDate endDate = startDate.plusDays(1);
 
     @BeforeEach
     void init() {
-        BookingSequence initialBookingSequence = new BookingSequence(0, bookingSequenceHelper.getBookingSequenceKey());
-        bookingSequenceRepository.save(initialBookingSequence);
-        Car car1 = new Car("ABC123","Opel","Astra", CarTypeEnum.SEDAN,5);
-        carRepository.save(car1);
-        Car car2 = new Car("ABC124","Opel","Astra", CarTypeEnum.SEDAN,5);
-        carRepository.save(car2);
-        Car car3 = new Car("ABC125","Opel","Astra", CarTypeEnum.STATION_WAGON,5);
-        carRepository.save(car3);
-        bookingRepository.deleteAll();
+        bookingSequenceRepository.save(new BookingSequence(INITIAL_SEQUENCE, bookingSequenceHelper.getBookingSequenceKey()));
+        carRepository.saveAll(getCars());
     }
 
     @AfterEach
-    void cleanUp(){
+    void cleanUp() {
         bookingRepository.deleteAll();
         bookingSequenceRepository.deleteAll();
         carRepository.deleteAll();
     }
 
     @Test
-    public void testConcurrentBooking() throws InterruptedException, ExecutionException {
+    @Order(1)
+    void testConcurrentBooking() throws InterruptedException, ExecutionException {
         ExecutorService executorService = Executors.newFixedThreadPool(2);
         try {
-            executorService.submit(() -> bookingService.createBooking(userId1, licencePlate, startDate, endDate));
-            executorService.submit(() -> bookingService.createBooking(userId2, licencePlate, startDate.plusDays(3), endDate.plusDays(3)));
+            executorService.submit(() -> bookingService.createBooking(USER_ID, LICENCE_PLATE, START_DATE, END_DATE));
+            executorService.submit(() -> bookingService.createBooking(USER_ID_OTHER, LICENCE_PLATE, END_DATE.plusDays(3), END_DATE.plusDays(3)));
         } finally {
             executorService.shutdown();
         }
         executorService.awaitTermination(10, TimeUnit.SECONDS);
-        List<Booking> bookings = bookingRepository.findByCarLicencePlate(licencePlate);
+        List<Booking> bookings = bookingRepository.findByCarLicencePlate(LICENCE_PLATE);
 
-        assertThat(bookings.size()).isEqualTo(2);
-        assertThat(bookings).anySatisfy(booking -> assertThat(booking.getUserId()).isEqualTo(userId1));
-        assertThat(bookings).anySatisfy(booking -> assertThat(booking.getUserId()).isEqualTo(userId2));
+        assertThat(bookings)
+                .hasSize(2)
+                .anySatisfy(booking -> assertThat(booking.getUserId()).isEqualTo(USER_ID))
+                .anySatisfy(booking -> assertThat(booking.getUserId()).isEqualTo(USER_ID_OTHER));
     }
 
     @Test
-    public void testConcurrentBookingSameDates() throws InterruptedException, ExecutionException {
+    @Order(2)
+    void testConcurrentBookingSameDates() throws InterruptedException, ExecutionException {
         ExecutorService executorService = Executors.newFixedThreadPool(2);
         try {
-            executorService.submit(() -> bookingService.createBooking(userId1, licencePlate, startDate, endDate));
-            executorService.submit(() -> bookingService.createBooking(userId2, licencePlate, startDate, endDate));
-        } catch (Exception e){
+            executorService.submit(() -> bookingService.createBooking(USER_ID, LICENCE_PLATE, START_DATE, END_DATE));
+            executorService.submit(() -> bookingService.createBooking(USER_ID_OTHER, LICENCE_PLATE, START_DATE, END_DATE));
+        } catch (Exception e) {
         } finally {
             executorService.shutdown();
         }
         executorService.awaitTermination(10, TimeUnit.SECONDS);
-        assertThat(bookingRepository.findByCarLicencePlate(licencePlate).size()).isEqualTo(1);
+        assertThat(bookingRepository.findByCarLicencePlate(LICENCE_PLATE)).hasSize(1);
     }
-
 }

@@ -1,6 +1,6 @@
 package com.ferenc.reservation.exception;
 
-public class NoSuchCarException extends IllegalArgumentException{
+public class NoSuchCarException extends IllegalArgumentException {
 
     public NoSuchCarException() {
     }

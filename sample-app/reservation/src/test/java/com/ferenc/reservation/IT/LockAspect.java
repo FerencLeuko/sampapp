@@ -1,5 +1,7 @@
 package com.ferenc.reservation.IT;
 
+import java.time.Instant;
+
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
@@ -7,12 +9,10 @@ import org.aspectj.lang.annotation.Before;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
-import java.time.Instant;
-
 @Aspect
 @Component
 @Profile("test")
-public class LockAspect {
+class LockAspect {
 
     @Before("execution(* com.ferenc.reservation.repository.lock.LockService.acquireLock(..))")
     public void beforeAcquireLock(JoinPoint joinPoint) {

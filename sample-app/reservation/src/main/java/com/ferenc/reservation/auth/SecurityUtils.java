@@ -5,10 +5,9 @@ import org.springframework.security.oauth2.jwt.Jwt;
 
 public class SecurityUtils {
 
-    public static String getUserEmailFromToken(){
+    public static String getUserEmailFromToken() {
         Jwt principal = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        String email = principal.getClaim("email");
-        return email;
+        return principal.getClaim("email");
     }
 
 }

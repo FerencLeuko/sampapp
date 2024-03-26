@@ -7,6 +7,6 @@ import org.springframework.context.annotation.Profile;
 @Configuration
 @EnableAspectJAutoProxy
 @Profile("test")
-public class AspectConfig {
+class AspectConfig {
 
 }

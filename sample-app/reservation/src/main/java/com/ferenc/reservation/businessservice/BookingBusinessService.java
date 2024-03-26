@@ -1,9 +1,9 @@
 package com.ferenc.reservation.businessservice;
 
-import com.ferenc.reservation.repository.model.Booking;
-
 import java.time.LocalDate;
 import java.util.List;
+
+import com.ferenc.reservation.repository.model.Booking;
 
 public interface BookingBusinessService {
 

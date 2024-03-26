@@ -1,6 +1,7 @@
 package com.ferenc.reservation.exception;
 
 public class NoSuchBookingException extends IllegalArgumentException {
+
     public NoSuchBookingException() {
     }
 

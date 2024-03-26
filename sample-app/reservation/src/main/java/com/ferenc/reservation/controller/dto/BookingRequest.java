@@ -1,9 +1,14 @@
 package com.ferenc.reservation.controller.dto;
 
-import com.ferenc.reservation.controller.validator.*;
-import jakarta.validation.constraints.*;
-import lombok.*;
-import org.springframework.validation.annotation.*;
+import jakarta.validation.constraints.NotBlank;
+
+import org.springframework.validation.annotation.Validated;
+
+import com.ferenc.reservation.controller.validator.ValidRange;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor

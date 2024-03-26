@@ -1,20 +1,23 @@
 package com.ferenc.reservation.controller;
 
-import com.ferenc.reservation.controller.dto.CarDto;
-import com.ferenc.reservation.mapper.CarMapper;
-import com.ferenc.reservation.mapper.CarTypeMapper;
-import com.ferenc.reservation.businessservice.CarBusinessService;
-import lombok.RequiredArgsConstructor;
+import java.net.URI;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.mapstruct.factory.Mappers;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.net.URI;
-import java.time.LocalDate;
-import java.util.List;
-import java.util.stream.Collectors;
+import com.ferenc.reservation.businessservice.CarBusinessService;
+import com.ferenc.reservation.controller.dto.CarDto;
+import com.ferenc.reservation.mapper.CarMapper;
+import com.ferenc.reservation.mapper.CarTypeMapper;
+
+import lombok.RequiredArgsConstructor;
+
 @RestController
 @RequiredArgsConstructor
 public class CarController implements CarApi {
@@ -28,14 +31,22 @@ public class CarController implements CarApi {
     @Value("${server.cars.uri}")
     private String carsURI;
 
+    protected static CarMapper getCarMapper() {
+        return Mappers.getMapper(CarMapper.class);
+    }
+
+    protected static CarTypeMapper getCarTypeMapper() {
+        return Mappers.getMapper(CarTypeMapper.class);
+    }
+
     @Override
     public ResponseEntity<List<CarDto>> getAvailableCars(LocalDate startDate, LocalDate endDate) {
         List<CarDto> responseList =
-                carBusinessService.getAvailableCars(startDate,endDate)
+                carBusinessService.getAvailableCars(startDate, endDate)
                         .stream()
-                        .map( car -> carMapper.fromModel(car))
+                        .map(carMapper::fromModel)
                         .collect(Collectors.toList());
-        return ResponseEntity.ok( responseList );
+        return ResponseEntity.ok(responseList);
     }
 
     @Override
@@ -43,7 +54,7 @@ public class CarController implements CarApi {
     public ResponseEntity<List<CarDto>> getAllCars() {
         List<CarDto> response = carBusinessService.getAllCars()
                 .stream()
-                .map(car -> carMapper.fromModel(car))
+                .map(carMapper::fromModel)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(response);
     }
@@ -62,14 +73,6 @@ public class CarController implements CarApi {
                 carBusinessService.createCar(carMapper.fromDto(carDto)));
         URI uri = URI.create(carsURI.concat(String.valueOf(response.getLicencePlate())));
         return ResponseEntity.created(uri).build();
-    }
-
-    protected static CarMapper getCarMapper() {
-        return Mappers.getMapper(CarMapper.class);
-    }
-
-    protected static CarTypeMapper getCarTypeMapper(){
-        return Mappers.getMapper(CarTypeMapper.class);
     }
 
 }
