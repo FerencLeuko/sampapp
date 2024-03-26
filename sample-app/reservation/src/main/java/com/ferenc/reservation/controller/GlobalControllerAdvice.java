@@ -41,32 +41,32 @@ public class GlobalControllerAdvice extends ResponseEntityExceptionHandler {
     @ExceptionHandler(value = CarNotAvailableException.class)
     protected ResponseEntity<ErrorResponse> handleCarNotAvailableExceptions(
             CarNotAvailableException ex) {
-        return new ResponseEntity<ErrorResponse>(ErrorResponse.builder().message(ex.getMessage()).build(), HttpStatus.CONFLICT);
+        return new ResponseEntity<>(ErrorResponse.builder().message(ex.getMessage()).build(), HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(value = NoSuchCarException.class)
     protected ResponseEntity<ErrorResponse> handleNoSuchCarExceptions(
             NoSuchCarException ex) {
-        return new ResponseEntity<ErrorResponse>(ErrorResponse.builder().message("Not authorized.").build(), HttpStatus.FORBIDDEN);
+        return new ResponseEntity<>(ErrorResponse.builder().message("Not authorized.").build(), HttpStatus.FORBIDDEN);
     }
 
     @ExceptionHandler(value = NoSuchBookingException.class)
     protected ResponseEntity<ErrorResponse> handleNoSuchBookingExceptions(
             NoSuchBookingException ex) {
-        return new ResponseEntity<ErrorResponse>(ErrorResponse.builder().message("Not authorized.").build(), HttpStatus.FORBIDDEN);
+        return new ResponseEntity<>(ErrorResponse.builder().message("Not authorized.").build(), HttpStatus.FORBIDDEN);
     }
 
     @ExceptionHandler(value = AccessDeniedException.class)
     protected ResponseEntity<ErrorResponse> handleAccessDeniedExceptions(
             AccessDeniedException ex) {
-        logger.warn(ex.getMessage());
-        return new ResponseEntity<ErrorResponse>(ErrorResponse.builder().message("Not authorized.").build(), HttpStatus.FORBIDDEN);
+        logger.warn(ex.getMessage(), ex);
+        return new ResponseEntity<>(ErrorResponse.builder().message("Not authorized.").build(), HttpStatus.FORBIDDEN);
     }
 
     @ExceptionHandler(value = RuntimeException.class)
     protected ResponseEntity<ErrorResponse> handleRuntimeExceptions(RuntimeException ex) {
-        logger.error(ex.getMessage());
-        return new ResponseEntity<ErrorResponse>(ErrorResponse.builder().message("Something went wrong, please try again later.").build(),
+        logger.error(ex.getMessage(), ex);
+        return new ResponseEntity<>(ErrorResponse.builder().message("Something went wrong, please try again later.").build(),
                 HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
