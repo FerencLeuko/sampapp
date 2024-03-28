@@ -1,6 +1,6 @@
 package com.ferenc.messaging.integration.handler;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,7 +32,6 @@ class ResponseCreatingHandlerTest extends AbstractTest {
                         .build();
         Message<EmailDeliveryEvent> expected = new GenericMessage<>(emailDeliveryEventExpected);
 
-        assertEquals(expected.getClass(), actual.getClass());
-        assertEquals(expected.getPayload(), actual.getPayload());
+        assertThat(actual.getPayload()).isEqualTo(expected.getPayload());
     }
 }

@@ -20,21 +20,21 @@ class BookingMapperTest extends AbstractTest {
         Booking source = PODAM_FACTORY.manufacturePojo(Booking.class);
         BookingDto target = bookingMapper.fromModel(source);
 
-        assertBookingDetails(source, target);
+        assertBookingDetails(target, source);
     }
 
-    private void assertBookingDetails(Booking source, BookingDto target) {
-        assertThat(source.getBookingId()).isEqualTo(target.getBookingId());
-        assertThat(source.getUserId()).isEqualTo(target.getUserId());
-        assertThat(source.getStartDate()).isEqualTo(target.getStartDate());
-        assertThat(source.getEndDate()).isEqualTo(target.getEndDate());
-        assertCarDetails(source.getCar(), target.getCar());
+    private void assertBookingDetails(BookingDto target, Booking source) {
+        assertThat(target.getBookingId()).isEqualTo(source.getBookingId());
+        assertThat(target.getUserId()).isEqualTo(source.getUserId());
+        assertThat(target.getStartDate()).isEqualTo(source.getStartDate());
+        assertThat(target.getEndDate()).isEqualTo(source.getEndDate());
+        assertCarDetails(target.getCar(), source.getCar());
     }
 
-    private void assertCarDetails(Car expected, CarDto actual) {
-        assertThat(expected.getLicencePlate()).isEqualTo(actual.getLicencePlate());
-        assertThat(expected.getManufacturer()).isEqualTo(actual.getManufacturer());
-        assertThat(expected.getModel()).isEqualTo(actual.getModel());
-        assertThat(expected.getCarType().name()).isEqualTo(actual.getCarType().name());
+    private void assertCarDetails(CarDto actual, Car expected) {
+        assertThat(actual.getLicencePlate()).isEqualTo(expected.getLicencePlate());
+        assertThat(actual.getManufacturer()).isEqualTo(expected.getManufacturer());
+        assertThat(actual.getModel()).isEqualTo(expected.getModel());
+        assertThat(actual.getCarType().name()).isEqualTo(expected.getCarType().name());
     }
 }

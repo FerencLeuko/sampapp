@@ -66,13 +66,13 @@ class BookingEventFlowTest extends AbstractTest {
         inOrder.verify(emailSendingHandler, timeout(TIME_OUT)).handle(emailMessageCaptor.capture());
 
         Message<BookingEvent> capturedMessageForEmail = emailMessageCaptor.getValue();
-        assertThat(expected.getPayload()).isEqualTo(capturedMessageForEmail.getPayload());
+        assertThat(capturedMessageForEmail.getPayload()).isEqualTo(expected.getPayload());
 
         ArgumentCaptor<Message<BookingEvent>> responseMessageCaptor = ArgumentCaptor.forClass(Message.class);
         inOrder.verify(responseCreatingHandler, timeout(TIME_OUT)).handle(responseMessageCaptor.capture());
 
         Message<BookingEvent> capturedMessageForResponse = responseMessageCaptor.getValue();
-        assertThat(expected.getPayload()).isEqualTo(capturedMessageForResponse.getPayload());
+        assertThat(capturedMessageForResponse.getPayload()).isEqualTo(expected.getPayload());
     }
 
     @MessagingGateway

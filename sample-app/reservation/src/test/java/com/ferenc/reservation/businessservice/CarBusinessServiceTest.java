@@ -50,7 +50,7 @@ class CarBusinessServiceTest extends AbstractTest {
         when(bookingBusinessService.isCarAvailable(any(), any(), any())).thenReturn(true);
         List<Car> actual = carBusinessService.getAvailableCars(START_DATE, END_DATE);
 
-        assertThat(expected).isEqualTo(actual);
+        assertThat(actual).isEqualTo(expected);
 
         verify(carRepository).findAll();
         verify(bookingBusinessService, times(expected.size())).isCarAvailable(any(), any(), any());
@@ -62,7 +62,7 @@ class CarBusinessServiceTest extends AbstractTest {
         when(carRepository.findAll()).thenReturn(expected);
         List<Car> actual = carBusinessService.getAllCars();
 
-        assertThat(expected).isEqualTo(actual);
+        assertThat(actual).isEqualTo(expected);
 
         verify(carRepository).findAll();
     }
@@ -75,7 +75,7 @@ class CarBusinessServiceTest extends AbstractTest {
 
         Car retrievedCar = carBusinessService.getCar(licencePlate);
 
-        assertThat(car).isEqualTo(retrievedCar);
+        assertThat(retrievedCar).isEqualTo(car);
 
         verify(carRepository).findByLicencePlate(licencePlate);
     }
@@ -99,7 +99,7 @@ class CarBusinessServiceTest extends AbstractTest {
 
         Car createdCar = carBusinessService.createCar(car);
 
-        assertThat(car).isEqualTo(createdCar);
+        assertThat(createdCar).isEqualTo(car);
 
         verify(carRepository).save(car);
     }

@@ -1,6 +1,6 @@
 package com.ferenc.messaging.integration.handler;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,7 +13,7 @@ import org.springframework.messaging.support.ErrorMessage;
 import com.ferenc.messaging.integration.AbstractTest;
 
 @ExtendWith({ MockitoExtension.class })
-public class ErrorLogHandlerTest extends AbstractTest {
+class ErrorLogHandlerTest extends AbstractTest {
 
     @InjectMocks
     private ErrorLogHandler errorLogHandler;
@@ -27,8 +27,7 @@ public class ErrorLogHandlerTest extends AbstractTest {
 
         ErrorMessage expected = new ErrorMessage(exception, errorMessage);
         ErrorMessage actual = errorLogHandler.handle(expected);
-        assertEquals(expected.getClass(), actual.getClass());
-        assertEquals(expected, actual);
+        assertThat(actual).isEqualTo(expected);
     }
 
 }

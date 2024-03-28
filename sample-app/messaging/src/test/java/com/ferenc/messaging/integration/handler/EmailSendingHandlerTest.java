@@ -1,6 +1,6 @@
 package com.ferenc.messaging.integration.handler;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -37,7 +37,7 @@ class EmailSendingHandlerTest extends AbstractTest {
         BookingEvent bookingEvent = PODAM_FACTORY.manufacturePojo(BookingEvent.class);
         Message<BookingEvent> expected = new GenericMessage<>(bookingEvent);
         Message<BookingEvent> actual = emailSendingHandler.handle(expected);
-        assertEquals(expected.getPayload(), actual.getPayload());
+        assertThat(actual.getPayload()).isEqualTo(expected.getPayload());
         verify(emailSender).send(any(SimpleMailMessage.class));
     }
 }

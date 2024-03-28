@@ -149,7 +149,7 @@ class BookingBusinessServiceIT extends AbstractTest {
     @Test
     void testGetBooking() {
         Booking booking = bookingBusinessService.getBooking(BOOKING_ID);
-        assertEquals(BOOKING_ID, booking.getBookingId());
+        assertThat(booking.getBookingId()).isEqualTo(BOOKING_ID);
         assertThat(bookingRepository.findByUserId(USER_ID)).contains(booking);
     }
 

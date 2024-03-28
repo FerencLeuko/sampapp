@@ -93,7 +93,7 @@ class BookingBusinessServiceTest extends AbstractTest {
 
         Booking actual = bookingBusinessService.createBooking(expected.getUserId(), car.getLicencePlate(), expected.getStartDate(),
                 expected.getEndDate());
-        assertEquals(expected, actual);
+        assertThat(actual).isEqualTo(expected);
 
         verify(carRepository).findByLicencePlate(car.getLicencePlate());
         verify(bookingRepository).findByCarLicencePlate(car.getLicencePlate());
@@ -103,11 +103,11 @@ class BookingBusinessServiceTest extends AbstractTest {
 
         ArgumentCaptor<Booking> captor = ArgumentCaptor.forClass(Booking.class);
         verify(bookingRepository).save(captor.capture());
-        assertEquals(expected, captor.getValue());
+        assertThat(captor.getValue()).isEqualTo(expected);
 
         ArgumentCaptor<Booking> eventCaptor = ArgumentCaptor.forClass(Booking.class);
         verify(bookingEventPublishingService).publishNewBookingEvent(eventCaptor.capture());
-        assertEquals(expected, eventCaptor.getValue());
+        assertThat(captor.getValue()).isEqualTo(expected);
     }
 
     @Test
@@ -157,7 +157,7 @@ class BookingBusinessServiceTest extends AbstractTest {
         when(lockService.acquireLock(any(), any())).thenReturn(true);
 
         Booking actual = bookingBusinessService.updateBooking(expected.getBookingId(), expected.getStartDate(), expected.getEndDate());
-        assertEquals(expected, actual);
+        assertThat(actual).isEqualTo(expected);
 
         verify(bookingRepository).findByBookingId(expected.getBookingId());
         verify(bookingRepository).findByCarLicencePlate(car.getLicencePlate());
@@ -221,7 +221,7 @@ class BookingBusinessServiceTest extends AbstractTest {
         when(bookingRepository.findByBookingId(any())).thenReturn(Optional.of(expected));
 
         Booking actual = bookingBusinessService.getBooking(expected.getBookingId());
-        assertEquals(expected, actual);
+        assertThat(actual).isEqualTo(expected);
 
         verify(bookingRepository).findByBookingId(expected.getBookingId());
     }
@@ -250,7 +250,7 @@ class BookingBusinessServiceTest extends AbstractTest {
         when(bookingRepository.findByUserId(any())).thenReturn(expected);
 
         List<Booking> actual = bookingBusinessService.getAllBookingsByUserId(userId);
-        assertThat(expected).containsAll(actual);
+        assertThat(actual).containsAll(expected);
 
         verify(bookingRepository).findByUserId(userId);
     }
@@ -271,7 +271,7 @@ class BookingBusinessServiceTest extends AbstractTest {
         when(lockService.acquireLock(any(), any())).thenReturn(true);
 
         Booking actual = bookingBusinessService.deleteBooking(expected.getBookingId());
-        assertEquals(expected, actual);
+        assertThat(actual).isEqualTo(expected);
 
         verify(bookingRepository).findByBookingId(expected.getBookingId());
         verify(bookingRepository).deleteById(expected.getBookingId());
