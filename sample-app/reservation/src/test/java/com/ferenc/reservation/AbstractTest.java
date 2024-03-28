@@ -5,7 +5,6 @@ import static com.ferenc.reservation.TestConstants.LICENCE_PLATE;
 import static com.ferenc.reservation.TestConstants.LICENCE_PLATE_OTHER;
 import static com.ferenc.reservation.TestConstants.START_DATE;
 
-import java.time.LocalDate;
 import java.util.Set;
 
 import com.ferenc.reservation.controller.dto.BookingRequest;
@@ -17,24 +16,20 @@ import com.ferenc.reservation.repository.model.CarTypeEnum;
 import uk.co.jemos.podam.api.PodamFactory;
 import uk.co.jemos.podam.api.PodamFactoryImpl;
 
-public class AbstractTest {
+public abstract class AbstractTest {
 
     protected static final PodamFactory PODAM_FACTORY = new PodamFactoryImpl();
 
     protected static BookingRequest getValidBookingRequest() {
         BookingRequest bookingRequest = new BookingRequest();
         bookingRequest.setLicencePlate(LICENCE_PLATE);
-        LocalDate startDate = START_DATE;
-        LocalDate endDate = END_DATE;
-        DateRange dateRange = new DateRange(startDate, endDate);
-        bookingRequest.setDateRange(dateRange);
+        bookingRequest.setDateRange(new DateRange(START_DATE, END_DATE));
         return bookingRequest;
     }
 
     protected static UpdateRequest getValidUpdateRequest() {
         UpdateRequest updateRequest = new UpdateRequest();
-        DateRange dateRange = new DateRange(START_DATE, END_DATE);
-        updateRequest.setDateRange(dateRange);
+        updateRequest.setDateRange(new DateRange(START_DATE, END_DATE));
         return updateRequest;
     }
 
