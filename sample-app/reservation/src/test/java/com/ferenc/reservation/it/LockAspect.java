@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 
 @Aspect
 @Component
-@Profile("test")
+@Profile("aspectEnabled")
 class LockAspect {
 
     @Before("execution(* com.ferenc.reservation.repository.lock.LockService.acquireLock(..))")

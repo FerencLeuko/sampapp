@@ -25,6 +25,7 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Profile;
 import org.springframework.test.context.ActiveProfiles;
 
 import com.ferenc.reservation.AbstractTest;
@@ -40,7 +41,7 @@ import com.ferenc.reservation.repository.model.Booking;
 import com.ferenc.reservation.repository.model.BookingSequence;
 
 @SpringBootTest
-@ActiveProfiles("test")
+@ActiveProfiles({"test","aspectEnabled"})
 @Tag("IntegrationTest")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class LockServiceIT extends AbstractTest {
