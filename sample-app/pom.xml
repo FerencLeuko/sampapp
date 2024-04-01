@@ -97,6 +97,11 @@
                 <version>${archunit.version}</version>
                 <scope>test</scope>
             </dependency>
+            <dependency>
+                <groupId>org.aspectj</groupId>
+                <artifactId>aspectjweaver</artifactId>
+                <version>${aspectj.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
