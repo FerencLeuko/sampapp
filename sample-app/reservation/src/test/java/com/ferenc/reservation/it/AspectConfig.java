@@ -1,4 +1,4 @@
-package com.ferenc.reservation.IT;
+package com.ferenc.reservation.it;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;

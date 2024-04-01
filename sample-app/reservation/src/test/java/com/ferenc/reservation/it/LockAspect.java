@@ -1,4 +1,4 @@
-package com.ferenc.reservation.IT;
+package com.ferenc.reservation.it;
 
 import java.time.Instant;
 
