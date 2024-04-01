@@ -78,6 +78,34 @@ class LockServiceIT extends AbstractTest {
 
     @Test
     @Order(1)
+    void testConcurrentLocking() throws InterruptedException, ExecutionException {
+        ExecutorService executorService = Executors.newFixedThreadPool(2);
+        try {
+            executorService.submit(() -> lockService.acquireLock(LICENCE_PLATE, USER_ID));
+            executorService.submit(() -> lockService.acquireLock(LICENCE_PLATE, USER_ID_OTHER));
+        } finally {
+            executorService.shutdown();
+        }
+        executorService.awaitTermination(5, TimeUnit.SECONDS);
+        assertThat(pessimisticLockRepository.findAll()).hasSize(1);
+    }
+
+    @Test
+    @Order(2)
+    void testConcurrentLocking_differentCars() throws InterruptedException, ExecutionException {
+        ExecutorService executorService = Executors.newFixedThreadPool(2);
+        try {
+            executorService.submit(() -> lockService.acquireLock(LICENCE_PLATE, USER_ID));
+            executorService.submit(() -> lockService.acquireLock(LICENCE_PLATE_OTHER, USER_ID_OTHER));
+        } finally {
+            executorService.shutdown();
+        }
+        executorService.awaitTermination(5, TimeUnit.SECONDS);
+        assertThat(pessimisticLockRepository.findAll()).hasSize(2);
+    }
+
+    @Test
+    @Order(3)
     void testConcurrentBooking() throws InterruptedException, ExecutionException {
         ExecutorService executorService = Executors.newFixedThreadPool(2);
         try {
@@ -96,13 +124,12 @@ class LockServiceIT extends AbstractTest {
     }
 
     @Test
-    @Order(2)
-    void testConcurrentBookingSameDates() throws InterruptedException, ExecutionException {
+    @Order(3)
+    void testConcurrentBooking_sameDates() throws InterruptedException, ExecutionException {
         ExecutorService executorService = Executors.newFixedThreadPool(2);
         try {
             executorService.submit(() -> bookingService.createBooking(USER_ID, LICENCE_PLATE, START_DATE, END_DATE));
             executorService.submit(() -> bookingService.createBooking(USER_ID_OTHER, LICENCE_PLATE, START_DATE, END_DATE));
-        } catch (Exception e) {
         } finally {
             executorService.shutdown();
         }
@@ -111,30 +138,17 @@ class LockServiceIT extends AbstractTest {
     }
 
     @Test
-    @Order(3)
-    void testConcurrentLocking() throws InterruptedException, ExecutionException {
+    @Order(5)
+    void testConcurrentBooking_differentCars() throws InterruptedException, ExecutionException {
         ExecutorService executorService = Executors.newFixedThreadPool(2);
         try {
-            executorService.submit(() -> lockService.acquireLock(LICENCE_PLATE, USER_ID));
-            executorService.submit(() -> lockService.acquireLock(LICENCE_PLATE, USER_ID_OTHER));
+            executorService.submit(() -> bookingService.createBooking(USER_ID, LICENCE_PLATE, START_DATE, END_DATE));
+            executorService.submit(() -> bookingService.createBooking(USER_ID_OTHER, LICENCE_PLATE_OTHER, START_DATE, END_DATE));
         } finally {
             executorService.shutdown();
         }
-        executorService.awaitTermination(5, TimeUnit.SECONDS);
-        assertThat(pessimisticLockRepository.findAll()).hasSize(1);
-    }
-
-    @Test
-    @Order(4)
-    void testConcurrentLockingDifferentCars() throws InterruptedException, ExecutionException {
-        ExecutorService executorService = Executors.newFixedThreadPool(2);
-        try {
-            executorService.submit(() -> lockService.acquireLock(LICENCE_PLATE, USER_ID));
-            executorService.submit(() -> lockService.acquireLock(LICENCE_PLATE_OTHER, USER_ID_OTHER));
-        } finally {
-            executorService.shutdown();
-        }
-        executorService.awaitTermination(5, TimeUnit.SECONDS);
-        assertThat(pessimisticLockRepository.findAll()).hasSize(2);
+        executorService.awaitTermination(10, TimeUnit.SECONDS);
+        assertThat(bookingRepository.findByCarLicencePlate(LICENCE_PLATE)).hasSize(1);
+        assertThat(bookingRepository.findByCarLicencePlate(LICENCE_PLATE_OTHER)).hasSize(1);
     }
 }
