@@ -1,4 +1,4 @@
-package com.ferenc.reservation.IT;
+package com.ferenc.reservation.it;
 
 import static com.ferenc.reservation.TestConstants.END_DATE;
 import static com.ferenc.reservation.TestConstants.INITIAL_SEQUENCE;

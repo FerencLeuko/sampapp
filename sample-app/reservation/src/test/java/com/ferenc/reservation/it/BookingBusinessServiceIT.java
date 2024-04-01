@@ -1,4 +1,4 @@
-package com.ferenc.reservation.IT;
+package com.ferenc.reservation.it;
 
 import static com.ferenc.reservation.TestConstants.BOOKING_ID;
 import static com.ferenc.reservation.TestConstants.BOOKING_ID_OTHER;
