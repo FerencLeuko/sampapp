@@ -49,9 +49,9 @@ import ch.qos.logback.classic.LoggerContext;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class VirtualThreadsTest extends AbstractTest {
 
+    private static final TimeUnit TIME_UNIT = TimeUnit.SECONDS;
     private static final int SIZE = 1_000;
-    public static final int TIMEOUT = SIZE / 10;
-    public static final TimeUnit TIME_UNIT = TimeUnit.SECONDS;
+    private static final int TIMEOUT = SIZE / 10;
 
     private final Logger logger = LoggerFactory.getLogger(VirtualThreadsTest.class);
 
@@ -105,20 +105,21 @@ class VirtualThreadsTest extends AbstractTest {
             while (i++ < SIZE) {
                 executorService.submit(() -> bookingService.getAllBookings());
             }
-        }catch (Throwable e){
-            logger.error("Error: {}, cause: {} at {}." , e.getMessage(), e.getCause(), i);
+        } catch (Throwable e) {
+            logger.error("Error: {}, cause: {} at {}.", e.getMessage(), e.getCause(), i);
         } finally {
             executorService.shutdown();
             executorService.awaitTermination(TIMEOUT, TIME_UNIT);
         }
         long endTime = System.nanoTime();
-        String totalTime = String.format("%,d nanoseconds", endTime - startTime);
-        logger.info("\n\n Time taken on virtual pool to perform {} get operations was {}. \n", SIZE, totalTime);
+        String logMessage = String.format("%n%n Time taken on virtual pool to perform %,d get operations was %,d nanoseconds. %n", SIZE,
+                endTime - startTime);
+        logger.info(logMessage);
     }
 
     @Test
     @Order(2)
-    void testConcurrentGetAllBookings_normal() throws InterruptedException {
+    void testConcurrentGetAllBookings_platform() throws InterruptedException {
         ExecutorService executorService = Executors.newFixedThreadPool(SIZE);
         long startTime = System.nanoTime();
         int i = 0;
@@ -126,15 +127,16 @@ class VirtualThreadsTest extends AbstractTest {
             while (i++ < SIZE) {
                 executorService.submit(() -> bookingService.getAllBookings());
             }
-        }catch (Throwable e){
-            logger.error("Error: {}, cause: {} at {}." , e.getMessage(), e.getCause(), i);
+        } catch (Throwable e) {
+            logger.error("Error: {}, cause: {} at {}.", e.getMessage(), e.getCause(), i);
         } finally {
             executorService.shutdown();
             executorService.awaitTermination(TIMEOUT, TIME_UNIT);
         }
         long endTime = System.nanoTime();
-        String totalTime = String.format("%,d nanoseconds", endTime - startTime);
-        logger.info("\n\n Time taken on normal pool to perform {} get operations was {}. \n", SIZE, totalTime);
+        String logMessage = String.format("%n%n Time taken on platform pool to perform %,d get operations was %,d nanoseconds. %n", SIZE,
+                endTime - startTime);
+        logger.info(logMessage);
     }
 
     @Test
@@ -147,22 +149,23 @@ class VirtualThreadsTest extends AbstractTest {
             while (i++ < SIZE) {
                 LocalDate startDate = START_DATE.plusDays(i);
                 LocalDate endDate = START_DATE.plusDays(i);
-                executorService.submit(() -> bookingService.updateBooking(BOOKING_ID,startDate,endDate));
+                executorService.submit(() -> bookingService.updateBooking(BOOKING_ID, startDate, endDate));
             }
-        }catch (Throwable e){
-            logger.error("Error: {}, cause: {} at {}." , e.getMessage(), e.getCause(), i);
+        } catch (Throwable e) {
+            logger.error("Error: {}, cause: {} at {}.", e.getMessage(), e.getCause(), i);
         } finally {
             executorService.shutdown();
             executorService.awaitTermination(TIMEOUT, TIME_UNIT);
         }
         long endTime = System.nanoTime();
-        String totalTime = String.format("%,d nanoseconds", endTime - startTime);
-        logger.info("\n\n Time taken on virtual pool to perform {} update operations was {}. \n", SIZE, totalTime);
+        String logMessage = String.format("%n%n Time taken on virtual pool to perform %,d update operations was %,d nanoseconds. %n", SIZE,
+                endTime - startTime);
+        logger.info(logMessage);
     }
 
     @Test
     @Order(4)
-    void testConcurrentUpdateBooking_normal() throws InterruptedException {
+    void testConcurrentUpdateBooking_platform() throws InterruptedException {
         ExecutorService executorService = Executors.newFixedThreadPool(SIZE);
         long startTime = System.nanoTime();
         int i = 0;
@@ -170,17 +173,18 @@ class VirtualThreadsTest extends AbstractTest {
             while (i++ < SIZE) {
                 LocalDate startDate = START_DATE.plusDays(i);
                 LocalDate endDate = START_DATE.plusDays(i);
-                executorService.submit(() -> bookingService.updateBooking(BOOKING_ID,startDate,endDate));
+                executorService.submit(() -> bookingService.updateBooking(BOOKING_ID, startDate, endDate));
             }
-        }catch (Throwable e){
-            logger.error("Error: {}, cause: {} at {}." , e.getMessage(), e.getCause(), i);
+        } catch (Throwable e) {
+            logger.error("Error: {}, cause: {} at {}.", e.getMessage(), e.getCause(), i);
         } finally {
             executorService.shutdown();
             executorService.awaitTermination(TIMEOUT, TIME_UNIT);
         }
         long endTime = System.nanoTime();
-        String totalTime = String.format("%,d nanoseconds", endTime - startTime);
-        logger.info("\n\n Time taken on normal pool to perform {} update operations was {}. \n", SIZE, totalTime);
+        String logMessage = String.format("%n%n Time taken on platform pool to perform %,d update operations was %,d nanoseconds. %n", SIZE,
+                endTime - startTime);
+        logger.info(logMessage);
     }
 
     @Test
@@ -195,20 +199,21 @@ class VirtualThreadsTest extends AbstractTest {
                 LocalDate endDate = START_DATE.plusDays(i);
                 executorService.submit(() -> bookingService.createBooking(USER_ID, LICENCE_PLATE, startDate, endDate));
             }
-        }catch (Throwable e){
-            logger.error("Error: {}, cause: {} at {}." , e.getMessage(), e.getCause(), i);
+        } catch (Throwable e) {
+            logger.error("Error: {}, cause: {} at {}.", e.getMessage(), e.getCause(), i);
         } finally {
             executorService.shutdown();
             executorService.awaitTermination(TIMEOUT, TIME_UNIT);
         }
         long endTime = System.nanoTime();
-        String totalTime = String.format("%,d nanoseconds", endTime - startTime);
-        logger.info("\n\n Time taken on virtual pool to perform {} create operations was {}. \n", SIZE, totalTime);
+        String logMessage = String.format("%n%n Time taken on virtual pool to perform %,d create operations was %,d nanoseconds. %n", SIZE,
+                endTime - startTime);
+        logger.info(logMessage);
     }
 
     @Test
     @Order(6)
-    void testConcurrentCreateBooking_normal() throws InterruptedException {
+    void testConcurrentCreateBooking_platform() throws InterruptedException {
         ExecutorService executorService = Executors.newFixedThreadPool(SIZE);
         long startTime = System.nanoTime();
         int i = 0;
@@ -218,14 +223,15 @@ class VirtualThreadsTest extends AbstractTest {
                 LocalDate endDate = START_DATE.plusDays(i);
                 executorService.submit(() -> bookingService.createBooking(USER_ID, LICENCE_PLATE, startDate, endDate));
             }
-        }catch (Throwable e){
-            logger.error("Error: {}, cause: {} at {}." , e.getMessage(), e.getCause(), i);
+        } catch (Throwable e) {
+            logger.error("Error: {}, cause: {} at {}.", e.getMessage(), e.getCause(), i);
         } finally {
             executorService.shutdown();
             executorService.awaitTermination(TIMEOUT, TIME_UNIT);
         }
         long endTime = System.nanoTime();
-        String totalTime = String.format("%,d nanoseconds", endTime - startTime);
-        logger.info("\n\n Time taken on normal pool to perform {} create operations was {}. \n", SIZE, totalTime);
+        String logMessage = String.format("%n%n Time taken on platform pool to perform %,d create operations was %,d nanoseconds. %n", SIZE,
+                endTime - startTime);
+        logger.info(logMessage);
     }
 }
